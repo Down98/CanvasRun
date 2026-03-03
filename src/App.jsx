@@ -14,6 +14,30 @@ const TRACK_TIME_SCALE_EXP = 0.33;
 const TRACK_TIME_SCALE_MAX = 2.2;
 const MAX_PARTICLES = 900;
 const DUST_COLORS = ["#e2e8f0", "#cbd5e1", "#94a3b8", "#f8fafc"];
+const BGM_STEP_MS = 132;
+const BGM_CHORDS_MIDI = [
+  [52, 55, 59],
+  [57, 60, 64],
+  [59, 62, 66],
+  [55, 59, 62],
+  [50, 54, 57],
+  [52, 55, 59],
+  [57, 60, 64],
+  [59, 62, 66],
+  [55, 59, 62],
+  [57, 60, 64],
+  [52, 55, 59],
+  [47, 50, 54],
+  [52, 55, 59],
+  [59, 62, 66],
+  [57, 60, 64],
+  [55, 59, 62]
+];
+const BGM_BASS_MIDI = [40, 45, 47, 43, 38, 40, 45, 47, 43, 45, 40, 35, 40, 47, 45, 43];
+const BGM_LEAD_PATTERN_A = [0, 1, 2, 1, 2, 1, 0, 2, 1, 2, 1, 0, 2, 1, 2, 0];
+const BGM_LEAD_PATTERN_B = [2, 1, 0, 1, 2, 0, 1, 2, 0, 1, 2, 1, 0, 2, 1, 2];
+const AUDIO_MASTER_GAINS = [0, 0.09, 0.15, 0.22];
+const AUDIO_MASTER_LABELS = ["OFF", "30%", "60%", "100%"];
 
 const SKILL_PREFIXES = [
   "Crimson",
@@ -983,6 +1007,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState("setup");
   const [deployedRunners, setDeployedRunners] = useState([]);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [volumePreset, setVolumePreset] = useState(3);
   const [hud, setHud] = useState({
     leaderName: "-",
     surgeName: "-",
@@ -1001,6 +1026,11 @@ export default function App() {
   const rafRef = useRef(0);
   const canvasElementRef = useRef(null);
   const canvasSizeRef = useRef({ width: 0, height: 0, dpr: 1 });
+  const audioCtxRef = useRef(null);
+  const audioMasterRef = useRef(null);
+  const bgmTimerRef = useRef(0);
+  const lastSkillSfxAtRef = useRef(0);
+  const lastUltimateSfxAtRef = useRef(0);
   const skillPool = useMemo(() => buildSkillPool(), []);
 
   const raceRef = useRef({
@@ -1048,6 +1078,157 @@ export default function App() {
     const next = { id: `${Date.now()}-${Math.floor(Math.random() * 9999)}`, text, color, time: `${mm}:${ss}` };
     setRaceLogs((prev) => [...prev, next].slice(-90));
   };
+
+  const ensureAudio = () => {
+    if (typeof window === "undefined") return null;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    if (!audioCtxRef.current) {
+      const ctx = new Ctx();
+      const master = ctx.createGain();
+      master.gain.value = AUDIO_MASTER_GAINS[volumePreset] ?? AUDIO_MASTER_GAINS[3];
+      master.connect(ctx.destination);
+      audioCtxRef.current = ctx;
+      audioMasterRef.current = master;
+    }
+    const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    return ctx;
+  };
+
+  const midiToFreq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+
+  const playTone = (freq, durationSec, type = "square", gain = 0.03, delay = 0, slideTo = 0) => {
+    const ctx = ensureAudio();
+    const master = audioMasterRef.current;
+    if (!ctx || !master) return;
+    const t = ctx.currentTime + Math.max(0, delay);
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (slideTo > 0) {
+      osc.frequency.exponentialRampToValueAtTime(slideTo, t + Math.max(0.03, durationSec * 0.9));
+    }
+    amp.gain.setValueAtTime(0.0001, t);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + 0.004);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + durationSec);
+    osc.connect(amp);
+    amp.connect(master);
+    osc.start(t);
+    osc.stop(t + durationSec + 0.02);
+  };
+
+  const playNoiseBurst = (durationSec = 0.045, gain = 0.02, delay = 0, highpassHz = 1900) => {
+    const ctx = ensureAudio();
+    const master = audioMasterRef.current;
+    if (!ctx || !master) return;
+    const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * durationSec));
+    const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+    const channel = buffer.getChannelData(0);
+    for (let i = 0; i < sampleCount; i += 1) {
+      channel[i] = (Math.random() * 2 - 1) * (1 - i / sampleCount);
+    }
+    const src = ctx.createBufferSource();
+    const hp = ctx.createBiquadFilter();
+    const amp = ctx.createGain();
+    const t = ctx.currentTime + Math.max(0, delay);
+    src.buffer = buffer;
+    hp.type = "highpass";
+    hp.frequency.setValueAtTime(highpassHz, t);
+    amp.gain.setValueAtTime(0.0001, t);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + 0.003);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + durationSec);
+    src.connect(hp);
+    hp.connect(amp);
+    amp.connect(master);
+    src.start(t);
+    src.stop(t + durationSec + 0.01);
+  };
+
+  const playSkillSfx = () => {
+    const now = performance.now();
+    if (now - lastSkillSfxAtRef.current < 95) return;
+    lastSkillSfxAtRef.current = now;
+    playTone(880, 0.05, "square", 0.06, 0, 1174.66);
+    playTone(1174.66, 0.06, "square", 0.052, 0.04, 1396.91);
+    playTone(1396.91, 0.09, "triangle", 0.046, 0.08, 1318.51);
+    playTone(659.25, 0.04, "square", 0.026, 0.015, 587.33);
+  };
+
+  const playUltimateSfx = () => {
+    const now = performance.now();
+    if (now - lastUltimateSfxAtRef.current < 420) return;
+    lastUltimateSfxAtRef.current = now;
+    playTone(110, 0.22, "sawtooth", 0.06, 0, 329.63);
+    playTone(220, 0.24, "square", 0.054, 0.03, 659.25);
+    playTone(523.25, 0.22, "square", 0.05, 0.2, 783.99);
+    playTone(659.25, 0.24, "square", 0.056, 0.22, 987.77);
+    playTone(783.99, 0.34, "triangle", 0.05, 0.24, 1046.5);
+    playTone(261.63, 0.3, "triangle", 0.038, 0.24);
+    playTone(392, 0.3, "triangle", 0.036, 0.24);
+  };
+
+  const playFinishSfx = () => {
+    playTone(523.25, 0.12, "square", 0.05, 0);
+    playTone(659.25, 0.14, "square", 0.048, 0.1);
+    playTone(783.99, 0.16, "square", 0.046, 0.2);
+    playTone(1046.5, 0.26, "triangle", 0.05, 0.32);
+  };
+
+  const startBgm = () => {
+    if (typeof window === "undefined") return;
+    if (bgmTimerRef.current) return;
+    ensureAudio();
+    let step = 0;
+    const tick = () => {
+      const phraseLen = 16;
+      const phraseIdx = Math.floor(step / phraseLen);
+      const chordIdx = phraseIdx % BGM_CHORDS_MIDI.length;
+      const leadPattern = phraseIdx % 2 === 0 ? BGM_LEAD_PATTERN_A : BGM_LEAD_PATTERN_B;
+      const chord = BGM_CHORDS_MIDI[chordIdx];
+      const pat = step % phraseLen;
+      const leadPick = leadPattern[pat];
+      const supportPick = (leadPick + (pat % 3 === 0 ? 2 : 1)) % chord.length;
+      const leadMidi = chord[leadPick] + (pat % 4 === 0 ? 24 : 12);
+      const supportMidi = chord[supportPick] + 12;
+
+      playTone(midiToFreq(leadMidi), 0.098, "square", 0.052, 0);
+      playTone(midiToFreq(supportMidi), 0.072, "square", 0.028, 0.014);
+
+      if (step % 2 === 0) {
+        const bass = BGM_BASS_MIDI[chordIdx] + (pat % 8 === 0 ? 0 : 12);
+        playTone(midiToFreq(bass), 0.13, "triangle", 0.048, 0);
+        playTone(130, 0.06, "square", 0.018, 0, 58);
+      }
+
+      if (pat % 8 === 4) {
+        playTone(987.77, 0.05, "square", 0.014, 0.01);
+      }
+      if (pat === phraseLen - 1) {
+        playTone(392, 0.08, "square", 0.025, 0);
+      }
+
+      step += 1;
+    };
+    tick();
+    bgmTimerRef.current = window.setInterval(tick, BGM_STEP_MS);
+  };
+
+  const stopBgm = () => {
+    if (!bgmTimerRef.current) return;
+    window.clearInterval(bgmTimerRef.current);
+    bgmTimerRef.current = 0;
+  };
+
+  useEffect(() => {
+    const ctx = audioCtxRef.current;
+    const master = audioMasterRef.current;
+    if (!ctx || !master) return;
+    const target = AUDIO_MASTER_GAINS[volumePreset] ?? AUDIO_MASTER_GAINS[3];
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setTargetAtTime(target, ctx.currentTime, 0.035);
+  }, [volumePreset]);
 
   const announce = (race, text, color, lock = 0.6, dur = 1.45) => {
     race.note = text;
@@ -1235,6 +1416,7 @@ export default function App() {
     runner.lastSkillName = `[${skill.rank}] ${skill.name}`;
     runner.lastSkillUntil = race.elapsed + Math.min(2.2, skill.durationSec + 0.25);
     runner.lastSkillCastAt = race.elapsed;
+    playSkillSfx();
     const particleCount = Math.round((12 + Math.floor(Math.random() * 7)) * (skill.particleCount ?? 1));
     const particlePower = (0.9 + race.intensity * 0.52) * (skill.particlePower ?? 1);
     emitBurstParticles(race, runner, color, particleCount, particlePower, skill.rankColor);
@@ -1409,6 +1591,7 @@ export default function App() {
     runner.lastSkillName = `궁극기 ${ult.name}`;
     runner.lastSkillUntil = race.elapsed + Math.min(3.3, boostedDuration);
     runner.lastSkillCastAt = race.elapsed;
+    playUltimateSfx();
 
     const difficultyFx = clamp(0.84 + difficulty * 0.22, 0.95, 1.34);
     emitUltimateActivationParticles(race, runner, ult.color, "#f8fafc", (1.34 + race.intensity * 0.72) * fxDamp * difficultyFx);
@@ -1806,9 +1989,13 @@ export default function App() {
       target = clamp(target, 7.2, 42);
       r.speed += (target - r.speed) * 0.52;
       const before = r.distance;
-      r.distance = Math.min(race.trackMeters, r.distance + r.speed * dt);
+      const projectedDistance = before + r.speed * dt;
+      r.distance = Math.min(race.trackMeters, projectedDistance);
       if ((r.finishedAt === null || r.finishedAt === undefined) && before < race.trackMeters && r.distance >= race.trackMeters) {
-        r.finishedAt = race.elapsed;
+        const moved = Math.max(0.000001, projectedDistance - before);
+        const finishRatio = clamp((race.trackMeters - before) / moved, 0, 1);
+        const preciseFinish = race.elapsed - dt + dt * finishRatio;
+        r.finishedAt = Math.min(race.elapsed, preciseFinish + (r.paceSeed % 1) * 0.00008);
         emitBurstParticles(race, r, "#fde68a", 20, 1.22);
       }
 
@@ -1835,6 +2022,7 @@ export default function App() {
     if (!leader) {
       race.running = false;
       setIsRunning(false);
+      stopBgm();
       return syncUi(race, ts, true);
     }
 
@@ -1910,6 +2098,7 @@ export default function App() {
       race.prevTimestamp = 0;
       announce(race, `전원 완주! ${leader.name} 우승`, "#f59e0b", 1.9, 2.2);
       appendRaceLog(`전원 완주! 우승: ${leader.name}`, "#f59e0b");
+      playFinishSfx();
       setWinner(leader.name);
       setFinalResults(
         sorted.map((r, i) => ({
@@ -1922,6 +2111,7 @@ export default function App() {
       );
       setShowResultModal(true);
       setIsRunning(false);
+      stopBgm();
       return syncUi(race, ts, true);
     }
 
@@ -2266,6 +2456,12 @@ export default function App() {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      stopBgm();
+    };
+  }, []);
+
   const readSetupInput = () => {
     const names = parseRunnerNames(nameInput);
     const track = Number(trackInput);
@@ -2360,6 +2556,7 @@ export default function App() {
     setRaceLogs([]);
     appendRaceLog(`레이스 시작: ${runners.length}명 / ${setup.track}m`, "#22c55e");
     setIsRunning(true);
+    startBgm();
     setViewMode("race");
     setHud(buildHud(race));
     setRunnerCards(buildCards(race));
@@ -2373,14 +2570,37 @@ export default function App() {
     race.noteColor = "#475569";
     race.noteUntil = race.elapsed + 1.4;
     setIsRunning(false);
+    stopBgm();
     appendRaceLog("레이스 정지", "#64748b");
     setHud(buildHud(race));
     setRunnerCards(buildCards(race));
   };
 
+  const increaseVolume = () => {
+    setVolumePreset((prev) => Math.min(AUDIO_MASTER_GAINS.length - 1, prev + 1));
+  };
+
+  const decreaseVolume = () => {
+    setVolumePreset((prev) => Math.max(0, prev - 1));
+  };
+
+  const toggleMute = () => {
+    setVolumePreset((prev) => (prev === 0 ? 3 : 0));
+  };
+
   const backToSetup = () => {
     stopRace();
     setShowResultModal(false);
+    setViewMode("setup");
+  };
+
+  const resetGame = () => {
+    stopRace();
+    setShowResultModal(false);
+    setWinner("");
+    setFinalResults([]);
+    setRaceLogs([]);
+    setDeployedRunners([]);
     setViewMode("setup");
   };
 
@@ -2455,7 +2675,13 @@ export default function App() {
                 <button onClick={() => setShowResultModal(true)} className="ghost" disabled={!finalResults.length}>
                   순위보기
                 </button>
-                <button onClick={backToSetup} className="ghost">설정 화면</button>
+                <button onClick={resetGame} className="restart">게임 재설정</button>
+                <button onClick={decreaseVolume} className="ghost">볼륨 -</button>
+                <button onClick={increaseVolume} className="ghost">볼륨 +</button>
+                <button onClick={toggleMute} className="ghost">{volumePreset === 0 ? "소리 켜기" : "음소거"}</button>
+                <button className="ghost" disabled>
+                  사운드 {AUDIO_MASTER_LABELS[volumePreset]}
+                </button>
               </div>
 
               <div className="canvas-shell race-canvas-shell">
@@ -2607,7 +2833,7 @@ export default function App() {
                       <span className="final-name" style={{ color: r.color }}>
                         {r.name}
                       </span>
-                      <span className="final-time">{r.finishTime.toFixed(2)}s</span>
+                      <span className="final-time">{r.finishTime.toFixed(3)}s</span>
                     </div>
                   ))}
                 </div>

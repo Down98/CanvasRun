@@ -85,6 +85,10 @@ button.ghost {
   background: linear-gradient(180deg, #697f96, #4f6176);
 }
 
+button.restart {
+  background: linear-gradient(180deg, #f97316, #ea580c);
+}
+
 button:disabled {
   opacity: 0.56;
   cursor: not-allowed;
