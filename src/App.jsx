@@ -40,6 +40,7 @@ const AUDIO_MASTER_GAINS = [0, 0.09, 0.15, 0.22];
 const AUDIO_MASTER_LABELS = ["OFF", "30%", "60%", "100%"];
 const PACE_MIN_RUN_HOLD_SEC = 1.05;
 const PACE_MIN_RECOVER_HOLD_SEC = 1.2;
+const STAMINA_PHASE_TARGET_BASE = { opening: 0.75, middle: 0.4, final: 0.1 };
 const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
 
 const SKILL_PREFIXES = [
@@ -584,6 +585,48 @@ function limitRecoverSkills(skills, pool, maxRecover = 1, maxPerKind = 1) {
   return next.slice(0, targetCount);
 }
 
+function createStaminaPlan(traitId) {
+  const plan = { ...STAMINA_PHASE_TARGET_BASE };
+
+  if (traitId === "steady") {
+    plan.opening += 0.04;
+    plan.middle += 0.04;
+    plan.final += 0.01;
+  } else if (traitId === "endurance") {
+    plan.opening += 0.015;
+    plan.middle += 0.015;
+    plan.final += 0.008;
+  } else if (traitId === "late_runner" || traitId === "closer") {
+    plan.opening += 0.05;
+    plan.middle += 0.05;
+    plan.final -= 0.01;
+  } else if (traitId === "front_runner" || traitId === "sprinter") {
+    plan.opening -= 0.08;
+    plan.middle -= 0.06;
+    plan.final += 0.02;
+  } else if (traitId === "mid_spender") {
+    plan.opening -= 0.04;
+    plan.middle -= 0.1;
+    plan.final += 0.01;
+  } else if (traitId === "risk_taker") {
+    plan.opening -= 0.06;
+    plan.middle -= 0.08;
+    plan.final -= 0.01;
+  } else if (traitId === "last_fight") {
+    plan.opening += 0.02;
+    plan.middle += 0.02;
+    plan.final -= 0.02;
+  }
+
+  plan.opening = clamp(plan.opening, 0.56, 0.9);
+  plan.middle = clamp(plan.middle, 0.22, 0.72);
+  plan.final = clamp(plan.final, 0.04, 0.26);
+  if (plan.middle > plan.opening - 0.05) plan.middle = plan.opening - 0.05;
+  if (plan.final > plan.middle - 0.05) plan.final = plan.middle - 0.05;
+
+  return plan;
+}
+
 function createPaceProfile(traitId) {
   const base = {
     runMinSec: 2.3,
@@ -679,17 +722,17 @@ function createPaceProfile(traitId) {
     });
   } else if (traitId === "endurance") {
     Object.assign(base, {
-      runMinSec: 2.5,
-      runMaxSec: 3.8,
-      recoverMinSec: 1.4,
-      recoverMaxSec: 2.7,
-      runSpeedMul: 1.43,
-      recoverSpeedMul: 0.86,
-      runDrainMul: 1.34,
-      recoverDrainMul: 0.2,
-      recoverRegenPerSec: 0.0069,
-      recoverStartStamina: 0.28,
-      resumeStamina: 0.76
+      runMinSec: 2.6,
+      runMaxSec: 3.9,
+      recoverMinSec: 1.45,
+      recoverMaxSec: 2.85,
+      runSpeedMul: 1.37,
+      recoverSpeedMul: 0.84,
+      runDrainMul: 1.46,
+      recoverDrainMul: 0.24,
+      recoverRegenPerSec: 0.0058,
+      recoverStartStamina: 0.31,
+      resumeStamina: 0.73
     });
   } else if (traitId === "sprinter") {
     Object.assign(base, {
@@ -796,6 +839,7 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
     const loadout = drawLoadout();
     const trait = RUNNER_TRAITS[Math.floor(Math.random() * RUNNER_TRAITS.length)];
     const paceProfile = createPaceProfile(trait.id);
+    const staminaPlan = createStaminaPlan(trait.id);
     const initialRunSec = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62);
     const ultimate = { ...ultimatePool[Math.floor(Math.random() * ultimatePool.length)] };
     return {
@@ -804,7 +848,7 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
       color: colorForIndex(i, names.length),
       distance: 0,
       speed: 0,
-      baseSpeed: 15.2 + Math.random() * 3.3,
+      baseSpeed: 17.4 + Math.random() * 3.8,
       paceSeed: Math.random() * Math.PI * 2,
       laneOffset: (Math.random() - 0.5) * 120,
       finalKickStart: 0.7 + Math.random() * 0.16,
@@ -815,6 +859,7 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
       traitLabel: trait.label,
       traitColor: trait.color,
       traitSeed: Math.random(),
+      staminaPlan,
       paceProfile,
       paceMode: "run",
       paceModeUntil: initialRunSec,
@@ -850,6 +895,7 @@ function prepareRunnersForRace(baseRunners) {
   return baseRunners.map((r, i) => {
     const skills = r.skills.map((s) => ({ ...s }));
     const paceProfile = { ...(r.paceProfile ?? createPaceProfile(r.traitId)) };
+    const staminaPlan = { ...(r.staminaPlan ?? createStaminaPlan(r.traitId)) };
     return {
       ...r,
       id: `${r.name}-${i}-${Date.now()}-${Math.floor(Math.random() * 9999)}`,
@@ -865,6 +911,7 @@ function prepareRunnersForRace(baseRunners) {
       lastSkillName: "",
       lastSkillUntil: 0,
       finishedAt: null,
+      staminaPlan,
       paceProfile,
       paceMode: "run",
       paceModeUntil: rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62),
@@ -1290,7 +1337,6 @@ export default function App() {
   };
 
   const canUseSkill = (skill, runner, c) => {
-    if (skill.kind !== "recover" && runner.stamina <= Math.min(0.26, (skill.staminaCostRate ?? 0.08) + 0.02)) return false;
     if (skill.kind === "recover" && runner.stamina > skill.triggerStaminaMax) return false;
     if (skill.kind === "late" && c.progress < skill.minProgress) return false;
     if (skill.kind === "chase" && c.gapLeader < skill.minGapMeters) return false;
@@ -1334,33 +1380,41 @@ export default function App() {
     let traitSkillChanceMul = 1;
     if (runner.traitId === "tactician") traitSkillChanceMul = 1.24;
     if (runner.traitId === "risk_taker") traitSkillChanceMul = 1.12;
-    if (runner.traitId === "endurance") traitSkillChanceMul = 0.85;
+    if (runner.traitId === "endurance") traitSkillChanceMul = 0.68;
     if (runner.traitId === "steady") traitSkillChanceMul = 0.96;
     const fieldSize = Math.max(2, race.runners.length);
     let rankSkillChanceMul = 1;
     let rankSkillChanceAdd = 0;
     if (c.rank >= 2) {
       const chaser01 = clamp((c.rank - 2) / Math.max(1, fieldSize - 2), 0, 1);
-      rankSkillChanceMul = lerp(1.08, 1.28, chaser01);
-      rankSkillChanceAdd = lerp(0.02, 0.08, chaser01);
+      rankSkillChanceMul = lerp(1.16, 1.46, chaser01);
+      rankSkillChanceAdd = lerp(0.04, 0.14, chaser01);
+      if (skill.kind === "recover") {
+        rankSkillChanceAdd += lerp(0.03, 0.1, chaser01);
+      }
     }
+    const leaderGapThreshold = Math.max(16, race.trackMeters * 0.015);
+    const aheadGapThreshold = Math.max(7, race.trackMeters * 0.007);
+    const leaderGap01 =
+      c.rank > 1 ? clamp((c.gapLeader - leaderGapThreshold) / Math.max(14, race.trackMeters * 0.03), 0, 2) : 0;
+    const aheadGapValue = c.gapAhead < Infinity ? c.gapAhead : 0;
+    const aheadGap01 =
+      c.rank > 1 ? clamp((aheadGapValue - aheadGapThreshold) / Math.max(8, race.trackMeters * 0.022), 0, 2.2) : 0;
+    const gapPressure01 = clamp(Math.max(leaderGap01 * 0.7, aheadGap01), 0, 2.2);
+    const gapSkillChanceMul = 1 + gapPressure01 * 0.62;
+    const gapSkillChanceAdd = gapPressure01 * 0.09;
+    const gapPhaseMul = race.phaseKey === "opening" ? 0.45 : race.phaseKey === "middle" ? 0.8 : 1;
     const phaseSkillChanceMul = race.phaseKey === "opening" ? 0.35 : race.phaseKey === "middle" ? 0.7 : 1;
     const finalTriggerChance = clamp(
       skill.triggerChance * (0.92 + race.intensity * 0.22) * traitSkillChanceMul * rankSkillChanceMul * phaseSkillChanceMul +
-        rankSkillChanceAdd * phaseSkillChanceMul,
+        rankSkillChanceAdd * phaseSkillChanceMul +
+        gapSkillChanceAdd * gapPhaseMul,
       0.01,
       0.72
     );
-    if (Math.random() >= finalTriggerChance) return;
+    const boostedTriggerChance = clamp(finalTriggerChance * gapSkillChanceMul, 0.01, 0.8);
+    if (Math.random() >= boostedTriggerChance) return;
 
-    let skillCostMul = 1;
-    if (runner.traitId === "endurance") skillCostMul *= 0.88;
-    if (runner.traitId === "tactician") skillCostMul *= 0.93;
-    if (runner.traitId === "risk_taker") skillCostMul *= 1.08;
-    const baseSkillCost = skill.staminaCostRate ?? 0.08;
-    const skillCost = clamp(baseSkillCost * skillCostMul * (skill.kind === "recover" ? 0.5 : 1), 0.02, 0.2);
-    if (skill.kind !== "recover" && runner.stamina <= skillCost + 0.01) return;
-    runner.stamina = clamp(runner.stamina - skillCost, 0.04, 1);
     if (skill.kind === "recover") {
       runner.stamina = clamp(runner.stamina + (skill.instantStaminaGain ?? 0), 0.04, 1);
     }
@@ -1482,14 +1536,14 @@ export default function App() {
     emitBurstParticles(race, runner, color, particleCount, particlePower, skill.rankColor);
     emitBurstParticles(race, runner, "#f8fafc", Math.max(5, Math.floor(particleCount * 0.34)), particlePower * 0.75, skill.rankColor);
     appendRaceLog(
-      `${runner.name} 스킬 [${skill.rank}] ${skill.kindLabel} ${skill.name} 발동 (스태미나 -${Math.round(skillCost * 100)}%)`,
+      `${runner.name} 스킬 [${skill.rank}] ${skill.kindLabel} ${skill.name} 발동`,
       color
     );
 
     if (race.elapsed >= race.nextNoteAllowed && (c.rank <= 3 || skill.kind === "duel" || skill.kind === "gamble")) {
       announce(
         race,
-        `${runner.name} - [${skill.rank}] ${skill.kindLabel} ${skill.name} (-${Math.round(skillCost * 100)}%)`,
+        `${runner.name} - [${skill.rank}] ${skill.kindLabel} ${skill.name}`,
         color,
         0.55,
         1.35
@@ -1820,7 +1874,9 @@ export default function App() {
 
       const fieldSize = race.runners.length;
       const paceProfile = r.paceProfile ?? createPaceProfile(r.traitId);
+      const staminaPlan = r.staminaPlan ?? createStaminaPlan(r.traitId);
       if (!r.paceProfile) r.paceProfile = paceProfile;
+      if (!r.staminaPlan) r.staminaPlan = staminaPlan;
       if (!r.paceMode) r.paceMode = "run";
       if (!r.paceModeUntil || Number.isNaN(r.paceModeUntil)) {
         r.paceModeUntil = race.elapsed + rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.58);
@@ -1834,6 +1890,11 @@ export default function App() {
       const desperateChase = latePhase && c.rank >= Math.max(3, fieldSize - 1);
       const lowStaminaGate = clamp(paceProfile.recoverStartStamina + (c.progress > 0.78 ? 0.02 : 0), 0.12, 0.82);
       const highStaminaGate = clamp(paceProfile.resumeStamina - (latePhase ? 0.03 : 0), lowStaminaGate + 0.08, 0.95);
+      const phaseTargetStamina =
+        race.phaseKey === "opening" ? staminaPlan.opening : race.phaseKey === "middle" ? staminaPlan.middle : staminaPlan.final;
+      const staminaGap = phaseTargetStamina - r.stamina;
+      const preserveStrength = clamp(staminaGap / 0.28, 0, 1);
+      const surplusStrength = clamp(-staminaGap / 0.32, 0, 1);
 
       const rollRunWindow = () => {
         let d = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.56);
@@ -1970,11 +2031,16 @@ export default function App() {
         spendDrive *= 1.1;
       }
       if (r.traitId === "endurance") {
-        speedMul *= 0.985;
-        drainMul *= 0.86;
-        regen += 0.0008;
-        fatigueIgnore += 0.04;
-        spendDrive *= 0.88;
+        speedMul *= 0.952;
+        drainMul *= 1.01;
+        regen += 0.00012;
+        fatigueIgnore += 0.008;
+        spendDrive *= 0.98;
+        if (race.phaseKey === "final" || race.phaseKey === "climax") {
+          speedMul *= 0.97;
+          spendDrive *= 0.95;
+          drainMul *= 1.04;
+        }
       }
       if (r.traitId === "sprinter") {
         if (race.phaseKey === "final" || race.phaseKey === "climax") {
@@ -2019,6 +2085,18 @@ export default function App() {
         } else {
           speedMul *= 0.97;
         }
+      }
+
+      if (preserveStrength > 0) {
+        speedMul *= 1 - preserveStrength * 0.16;
+        drainMul *= 1 - preserveStrength * 0.34;
+        spendDrive *= 1 - preserveStrength * 0.3;
+        regen += preserveStrength * (r.paceMode === "recover" ? 0.0032 : 0.0014);
+      } else if (surplusStrength > 0) {
+        const phaseSpendMul = race.phaseKey === "opening" ? 0.45 : race.phaseKey === "middle" ? 0.78 : 1;
+        speedMul *= 1 + surplusStrength * 0.11 * phaseSpendMul;
+        drainMul *= 1 + surplusStrength * 0.16 * phaseSpendMul;
+        spendDrive *= 1 + surplusStrength * 0.2 * phaseSpendMul;
       }
 
       for (const e of active) {
@@ -2111,7 +2189,23 @@ export default function App() {
             : race.phaseKey === "middle"
               ? lerp(0, r.paceMode === "recover" ? 0.0022 : 0.0008, rankTail01)
             : 0;
-      let recover = dt * (regen + (r.speed < 11 ? 0.004 : 0) + lateRankRecoverPerSec);
+      const leaderGapThreshold = Math.max(16, race.trackMeters * 0.015);
+      const aheadGapThreshold = Math.max(7, race.trackMeters * 0.007);
+      const leaderGapRecover01 =
+        c.rank > 1 ? clamp((c.gapLeader - leaderGapThreshold) / Math.max(14, race.trackMeters * 0.03), 0, 2.2) : 0;
+      const aheadGapValue = c.gapAhead < Infinity ? c.gapAhead : 0;
+      const aheadGapRecover01 =
+        c.rank > 1 ? clamp((aheadGapValue - aheadGapThreshold) / Math.max(8, race.trackMeters * 0.022), 0, 2.4) : 0;
+      const bigGapRecover01 = clamp(Math.max(leaderGapRecover01 * 0.7, aheadGapRecover01), 0, 2.4);
+      const bigGapRecoverPerSec =
+        race.phaseKey === "climax"
+          ? lerp(0, r.paceMode === "recover" ? 0.0082 : 0.0026, bigGapRecover01)
+          : race.phaseKey === "final"
+            ? lerp(0, r.paceMode === "recover" ? 0.0064 : 0.0021, bigGapRecover01)
+            : race.phaseKey === "middle"
+              ? lerp(0, r.paceMode === "recover" ? 0.0042 : 0.0014, bigGapRecover01)
+              : lerp(0, r.paceMode === "recover" ? 0.0022 : 0.0008, bigGapRecover01);
+      let recover = dt * (regen + (r.speed < 11 ? 0.004 : 0) + lateRankRecoverPerSec + bigGapRecoverPerSec);
       if (race.phaseKey === "opening") recover += dt * 0.0014;
       if (race.phaseKey === "climax") drain *= 1.14;
       drain *= clamp(0.86 + spendDrive * 0.34, 0.72, 1.42);
