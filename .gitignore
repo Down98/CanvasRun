@@ -40,3 +40,6 @@ Thumbs.db
 # Vite temp logs
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local agent notes
+AGENTS.md
