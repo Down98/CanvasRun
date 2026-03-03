@@ -531,30 +531,35 @@ function pickUnique(pool, n) {
   return ids.slice(0, n).map((i) => pool[i]);
 }
 
-function limitRecoverSkills(skills, pool, maxRecover = 1) {
+function limitRecoverSkills(skills, pool, maxRecover = 1, maxPerKind = 1) {
   const targetCount = skills.length;
   const next = [];
   const usedIds = new Set();
+  const usedKinds = new Map();
   let recoverCount = 0;
 
   for (const s of skills) {
     if (!s || usedIds.has(s.id)) continue;
+    if ((usedKinds.get(s.kind) ?? 0) >= maxPerKind) continue;
     if (s.kind === "recover") {
       if (recoverCount >= maxRecover) continue;
       recoverCount += 1;
     }
     next.push(s);
     usedIds.add(s.id);
+    usedKinds.set(s.kind, (usedKinds.get(s.kind) ?? 0) + 1);
   }
 
   if (next.length < targetCount) {
     const shuffled = pickUnique(pool, pool.length);
     for (const s of shuffled) {
       if (usedIds.has(s.id)) continue;
+      if ((usedKinds.get(s.kind) ?? 0) >= maxPerKind) continue;
       if (s.kind === "recover" && recoverCount >= maxRecover) continue;
       next.push(s);
       usedIds.add(s.id);
       if (s.kind === "recover") recoverCount += 1;
+      usedKinds.set(s.kind, (usedKinds.get(s.kind) ?? 0) + 1);
       if (next.length >= targetCount) break;
     }
   }
@@ -563,8 +568,12 @@ function limitRecoverSkills(skills, pool, maxRecover = 1) {
     const shuffled = pickUnique(pool, pool.length);
     for (const s of shuffled) {
       if (usedIds.has(s.id)) continue;
+      if ((usedKinds.get(s.kind) ?? 0) >= maxPerKind) continue;
+      if (s.kind === "recover" && recoverCount >= maxRecover) continue;
       next.push(s);
       usedIds.add(s.id);
+      if (s.kind === "recover") recoverCount += 1;
+      usedKinds.set(s.kind, (usedKinds.get(s.kind) ?? 0) + 1);
       if (next.length >= targetCount) break;
     }
   }
@@ -724,19 +733,19 @@ function createPaceProfile(traitId) {
     });
   } else if (traitId === "last_fight") {
     Object.assign(base, {
-      runMinSec: 1.9,
-      runMaxSec: 3.2,
+      runMinSec: 2.2,
+      runMaxSec: 3.6,
       recoverMinSec: 1.6,
-      recoverMaxSec: 2.8,
-      runSpeedMul: 1.49,
-      recoverSpeedMul: 0.85,
-      runDrainMul: 1.52,
+      recoverMaxSec: 3.1,
+      runSpeedMul: 1.41,
+      recoverSpeedMul: 0.83,
+      runDrainMul: 1.58,
       recoverDrainMul: 0.21,
-      recoverRegenPerSec: 0.0062,
-      recoverStartStamina: 0.27,
-      resumeStamina: 0.75,
-      earlyRunBias: 0.8,
-      lateRunBias: 1.28
+      recoverRegenPerSec: 0.0064,
+      recoverStartStamina: 0.3,
+      resumeStamina: 0.78,
+      earlyRunBias: 0.7,
+      lateRunBias: 1.34
     });
   }
 
@@ -749,8 +758,39 @@ function rollPaceDuration(minSec, maxSec, bias = 0.5) {
 }
 
 function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
+  const totalSkillNeed = names.length * 4;
+  const globalSkillDeck = totalSkillNeed <= pool.length ? pickUnique(pool, pool.length) : null;
+
+  const drawLoadout = () => {
+    if (!globalSkillDeck) return limitRecoverSkills(pickUnique(pool, 4), pool, 1);
+
+    const chosen = [];
+    const hold = [];
+    let recoverCount = 0;
+
+    while (globalSkillDeck.length && chosen.length < 4) {
+      const skill = globalSkillDeck.shift();
+      if (!skill) continue;
+      if (skill.kind === "recover" && recoverCount >= 1) {
+        hold.push(skill);
+        continue;
+      }
+      chosen.push(skill);
+      if (skill.kind === "recover") recoverCount += 1;
+    }
+
+    if (hold.length) globalSkillDeck.push(...hold);
+    if (chosen.length < 4) {
+      const refill = pickUnique(pool, pool.length)
+        .filter((s) => !chosen.some((c) => c.id === s.id))
+        .slice(0, 4 - chosen.length);
+      return limitRecoverSkills([...chosen, ...refill], pool, 1).slice(0, 4);
+    }
+    return limitRecoverSkills(chosen, pool, 1).slice(0, 4);
+  };
+
   return names.map((name, i) => {
-    const loadout = limitRecoverSkills(pickUnique(pool, 4), pool, 1);
+    const loadout = drawLoadout();
     const trait = RUNNER_TRAITS[Math.floor(Math.random() * RUNNER_TRAITS.length)];
     const paceProfile = createPaceProfile(trait.id);
     const initialRunSec = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62);
@@ -1291,7 +1331,22 @@ export default function App() {
     if (runner.traitId === "risk_taker") traitSkillChanceMul = 1.12;
     if (runner.traitId === "endurance") traitSkillChanceMul = 0.85;
     if (runner.traitId === "steady") traitSkillChanceMul = 0.96;
-    if (Math.random() >= skill.triggerChance * (0.92 + race.intensity * 0.22) * traitSkillChanceMul) return;
+    const fieldSize = Math.max(2, race.runners.length);
+    let rankSkillChanceMul = 1;
+    let rankSkillChanceAdd = 0;
+    if (c.rank >= 2) {
+      const chaser01 = clamp((c.rank - 2) / Math.max(1, fieldSize - 2), 0, 1);
+      rankSkillChanceMul = lerp(1.08, 1.28, chaser01);
+      rankSkillChanceAdd = lerp(0.02, 0.08, chaser01);
+    }
+    const phaseSkillChanceMul = race.phaseKey === "opening" ? 0.35 : race.phaseKey === "middle" ? 0.7 : 1;
+    const finalTriggerChance = clamp(
+      skill.triggerChance * (0.92 + race.intensity * 0.22) * traitSkillChanceMul * rankSkillChanceMul * phaseSkillChanceMul +
+        rankSkillChanceAdd * phaseSkillChanceMul,
+      0.01,
+      0.72
+    );
+    if (Math.random() >= finalTriggerChance) return;
 
     let skillCostMul = 1;
     if (runner.traitId === "endurance") skillCostMul *= 0.88;
@@ -1823,8 +1878,9 @@ export default function App() {
         runSpeedMul *= 0.94;
         runDrainMul *= 0.88;
       }
-      if (r.traitId === "last_fight" && c.rank >= fieldSize - 1) {
-        runSpeedMul *= 1.08;
+      if (r.traitId === "last_fight") {
+        if (c.rank === fieldSize) runSpeedMul *= 1.1;
+        else if (c.rank <= Math.max(1, Math.floor(fieldSize * 0.4))) runSpeedMul *= 0.92;
       }
 
       if (r.paceMode === "run") {
@@ -1920,17 +1976,25 @@ export default function App() {
         spendDrive *= 0.94;
       }
       if (r.traitId === "last_fight") {
-        if (c.progress < 0.34) {
-          speedMul *= 0.985;
-          drainMul *= 0.44;
-          spendDrive *= 0.52;
-          regen += 0.001;
-        } else if (c.rank >= fieldSize - 1) {
-          speedMul *= 1.22;
-          flat += 0.8;
-          drainMul *= 1.32;
-          spendDrive *= 1.46;
-        } else if (c.rank === 1) {
+        const isLast = c.rank === fieldSize;
+        const isBottom = c.rank >= Math.max(2, fieldSize - 1);
+        const isFrontPack = c.rank <= Math.max(1, Math.floor(fieldSize * 0.4));
+        if (isLast) {
+          speedMul *= 1.24;
+          flat += 0.88;
+          drainMul *= 1.3;
+          spendDrive *= 1.48;
+          regen += 0.0006;
+        } else if (isBottom) {
+          speedMul *= 1.12;
+          flat += 0.42;
+          drainMul *= 1.18;
+          spendDrive *= 1.24;
+        } else if (isFrontPack) {
+          speedMul *= 0.9;
+          drainMul *= 0.9;
+          spendDrive *= 0.86;
+        } else {
           speedMul *= 0.97;
         }
       }
@@ -1965,8 +2029,10 @@ export default function App() {
       const fatigue = clamp(1 - c.progress * 0.11 - (1 - r.stamina) * 0.68 + fatigueIgnore, 0.45, 1.12);
       const pace = 0.95 + Math.sin(race.elapsed * 2.25 + r.paceSeed) * 0.055;
       const jitter = (0.93 + Math.random() * 0.14) * varMul;
-      const chase = 1 + clamp((c.gapLeader / race.trackMeters) * 0.55, 0, 0.14);
-      const draft = c.gapAhead < Math.max(3.8, race.trackMeters * 0.0038) ? 1.02 : 1;
+      const finishCompressionFade = 1 - clamp((c.progress - 0.78) / 0.22, 0, 1);
+      const chase = 1 + clamp((c.gapLeader / race.trackMeters) * 0.55, 0, 0.14) * finishCompressionFade;
+      const draftBase = c.gapAhead < Math.max(3.8, race.trackMeters * 0.0038) ? 0.02 : 0;
+      const draft = 1 + draftBase * (0.22 + finishCompressionFade * 0.78);
       const kick = c.progress > r.finalKickStart ? 1 + (c.progress - r.finalKickStart) * r.finalKickPower : 1;
 
       let phaseBoost = 1;
@@ -1978,15 +2044,19 @@ export default function App() {
 
       const lastPlaceBoost =
         c.rank === race.runners.length
-          ? 1 + clamp(c.gapLeader / Math.max(28, race.trackMeters * 0.03), 0, 0.22)
+          ? 1 + clamp(c.gapLeader / Math.max(28, race.trackMeters * 0.03), 0, 0.08) * finishCompressionFade
           : 1;
 
       let target = r.baseSpeed * fatigue * pace * jitter * chase * draft * kick * phaseBoost * speedMul * lastPlaceBoost + flat;
       const spendIntensity = clamp((target / 22) * drainMul, 0, 3);
       const spendSpeedBonus = clamp((spendIntensity - 0.75) * 0.09 * spendDrive, 0, 0.34);
       target *= 1 + spendSpeedBonus;
-      if (c.rank > 3 && race.phaseKey !== "opening") target *= 1.01 + clamp((c.gapLeader / race.trackMeters) * 0.06, 0, 0.03);
-      target = clamp(target, 7.2, 42);
+      if (c.rank > 3 && race.phaseKey !== "opening") {
+        const trailingAssistFade = 0.12 + finishCompressionFade * 0.88;
+        target *= 1.001 + clamp((c.gapLeader / race.trackMeters) * 0.03, 0, 0.012) * trailingAssistFade;
+      }
+      const minTarget = 5.1 + clamp(r.stamina, 0, 1) * 1.9;
+      target = clamp(target, minTarget, 42);
       r.speed += (target - r.speed) * 0.52;
       const before = r.distance;
       const projectedDistance = before + r.speed * dt;
@@ -2100,15 +2170,14 @@ export default function App() {
       appendRaceLog(`전원 완주! 우승: ${leader.name}`, "#f59e0b");
       playFinishSfx();
       setWinner(leader.name);
-      setFinalResults(
-        sorted.map((r, i) => ({
-          id: r.id,
-          rank: i + 1,
-          name: r.name,
-          color: r.color,
-          finishTime: r.finishedAt ?? race.elapsed
-        }))
-      );
+      const finalRows = sorted.map((r, i) => ({
+        id: r.id,
+        rank: i + 1,
+        name: r.name,
+        color: r.color,
+        finishTime: r.finishedAt ?? race.elapsed
+      }));
+      setFinalResults(finalRows);
       setShowResultModal(true);
       setIsRunning(false);
       stopBgm();
