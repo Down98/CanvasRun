@@ -629,19 +629,19 @@ function createPaceProfile(traitId) {
     });
   } else if (traitId === "late_runner") {
     Object.assign(base, {
-      runMinSec: 2.1,
-      runMaxSec: 3.2,
-      recoverMinSec: 1.4,
-      recoverMaxSec: 2.3,
-      runSpeedMul: 1.46,
+      runMinSec: 2.5,
+      runMaxSec: 3.8,
+      recoverMinSec: 1.6,
+      recoverMaxSec: 2.6,
+      runSpeedMul: 1.38,
       recoverSpeedMul: 0.84,
-      runDrainMul: 1.52,
+      runDrainMul: 1.58,
       recoverDrainMul: 0.22,
-      recoverRegenPerSec: 0.0057,
-      recoverStartStamina: 0.31,
-      resumeStamina: 0.71,
-      earlyRunBias: 0.84,
-      lateRunBias: 1.22
+      recoverRegenPerSec: 0.0059,
+      recoverStartStamina: 0.34,
+      resumeStamina: 0.74,
+      earlyRunBias: 0.68,
+      lateRunBias: 1.34
     });
   } else if (traitId === "front_runner") {
     Object.assign(base, {
@@ -1865,12 +1865,18 @@ export default function App() {
 
       if (r.traitId === "late_runner" || r.traitId === "closer") {
         if (c.progress < 0.58) {
-          runSpeedMul *= 0.93;
-          runDrainMul *= 0.88;
-          recoverRegen *= 1.1;
+          if (r.traitId === "late_runner") {
+            runSpeedMul *= 0.88;
+            runDrainMul *= 0.98;
+            recoverRegen *= 1.06;
+          } else {
+            runSpeedMul *= 0.93;
+            runDrainMul *= 0.88;
+            recoverRegen *= 1.1;
+          }
         } else {
-          runSpeedMul *= 1.1;
-          runDrainMul *= 1.06;
+          runSpeedMul *= r.traitId === "late_runner" ? 1.14 : 1.1;
+          runDrainMul *= r.traitId === "late_runner" ? 1.1 : 1.06;
           recoverSpeedMul *= 0.95;
         }
       }
@@ -1917,15 +1923,19 @@ export default function App() {
         }
       }
       if (r.traitId === "late_runner") {
-        if (c.progress < 0.58) {
-          speedMul *= 0.95;
-          drainMul *= 0.78;
-          spendDrive *= 0.8;
+        if (c.progress < 0.62) {
+          const frontPackCutoff = Math.max(2, Math.ceil(fieldSize * 0.35));
+          const isFrontPack = c.rank <= frontPackCutoff;
+          speedMul *= isFrontPack ? 0.82 : 0.9;
+          flat += isFrontPack ? -0.55 : -0.2;
+          drainMul *= isFrontPack ? 1.06 : 0.92;
+          spendDrive *= isFrontPack ? 0.68 : 0.78;
+          if (race.phaseKey === "opening") speedMul *= 0.92;
         } else {
-          speedMul *= 1.2;
-          flat += 0.4;
-          drainMul *= 1.22;
-          spendDrive *= 1.26;
+          speedMul *= 1.24;
+          flat += 0.52;
+          drainMul *= 1.28;
+          spendDrive *= 1.3;
         }
       }
       if (r.traitId === "front_runner") {
