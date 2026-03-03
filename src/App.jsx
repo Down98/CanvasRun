@@ -38,6 +38,9 @@ const BGM_LEAD_PATTERN_A = [0, 1, 2, 1, 2, 1, 0, 2, 1, 2, 1, 0, 2, 1, 2, 0];
 const BGM_LEAD_PATTERN_B = [2, 1, 0, 1, 2, 0, 1, 2, 0, 1, 2, 1, 0, 2, 1, 2];
 const AUDIO_MASTER_GAINS = [0, 0.09, 0.15, 0.22];
 const AUDIO_MASTER_LABELS = ["OFF", "30%", "60%", "100%"];
+const PACE_MIN_RUN_HOLD_SEC = 1.05;
+const PACE_MIN_RECOVER_HOLD_SEC = 1.2;
+const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
 
 const SKILL_PREFIXES = [
   "Crimson",
@@ -815,6 +818,7 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
       paceProfile,
       paceMode: "run",
       paceModeUntil: initialRunSec,
+      paceLockedUntil: 0,
       paceCycle: 0,
       ultimate,
       ultimateUsed: false,
@@ -864,6 +868,7 @@ function prepareRunnersForRace(baseRunners) {
       paceProfile,
       paceMode: "run",
       paceModeUntil: rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62),
+      paceLockedUntil: 0,
       paceCycle: 0,
       ultimate: { ...(r.ultimate ?? ULTIMATE_POOL[0]) },
       ultimateUsed: false,
@@ -1820,6 +1825,10 @@ export default function App() {
       if (!r.paceModeUntil || Number.isNaN(r.paceModeUntil)) {
         r.paceModeUntil = race.elapsed + rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.58);
       }
+      if (r.paceLockedUntil === undefined || r.paceLockedUntil === null || Number.isNaN(r.paceLockedUntil)) {
+        r.paceLockedUntil = 0;
+      }
+      const canSwitchPaceMode = race.elapsed >= r.paceLockedUntil;
 
       const latePhase = race.phaseKey === "final" || race.phaseKey === "climax";
       const desperateChase = latePhase && c.rank >= Math.max(3, fieldSize - 1);
@@ -1843,17 +1852,20 @@ export default function App() {
       if (r.paceMode === "run") {
         const timedOut = race.elapsed >= r.paceModeUntil;
         const forced = r.stamina <= lowStaminaGate;
-        if (forced || timedOut) {
+        if ((forced || timedOut) && canSwitchPaceMode) {
           r.paceMode = "recover";
           r.paceModeUntil = race.elapsed + rollRecoverWindow(forced);
+          r.paceLockedUntil = race.elapsed + PACE_MIN_RECOVER_HOLD_SEC;
           r.paceCycle = (r.paceCycle ?? 0) + 1;
         }
       } else {
         const timedOut = race.elapsed >= r.paceModeUntil;
         const recoveredEnough = r.stamina >= highStaminaGate;
-        if ((recoveredEnough && race.elapsed >= r.paceModeUntil - 0.28) || timedOut || desperateChase) {
+        const wantRunSwitch = (recoveredEnough && race.elapsed >= r.paceModeUntil - 0.28) || timedOut || desperateChase;
+        if (wantRunSwitch && canSwitchPaceMode) {
           r.paceMode = "run";
           r.paceModeUntil = race.elapsed + rollRunWindow();
+          r.paceLockedUntil = race.elapsed + PACE_MIN_RUN_HOLD_SEC;
         }
       }
 
@@ -2090,7 +2102,16 @@ export default function App() {
       }
 
       let drain = dt * (r.speed / 24.5) * 0.032 * drainMul;
-      let recover = dt * (regen + (r.speed < 11 ? 0.004 : 0));
+      const rankTail01 = clamp((c.rank - 1) / Math.max(1, fieldSize - 1), 0, 1);
+      const lateRankRecoverPerSec =
+        race.phaseKey === "climax"
+          ? lerp(0, r.paceMode === "recover" ? 0.0048 : 0.0017, rankTail01)
+          : race.phaseKey === "final"
+            ? lerp(0, r.paceMode === "recover" ? 0.0036 : 0.0012, rankTail01)
+            : race.phaseKey === "middle"
+              ? lerp(0, r.paceMode === "recover" ? 0.0022 : 0.0008, rankTail01)
+            : 0;
+      let recover = dt * (regen + (r.speed < 11 ? 0.004 : 0) + lateRankRecoverPerSec);
       if (race.phaseKey === "opening") recover += dt * 0.0014;
       if (race.phaseKey === "climax") drain *= 1.14;
       drain *= clamp(0.86 + spendDrive * 0.34, 0.72, 1.42);
@@ -2926,6 +2947,7 @@ export default function App() {
           )}
         </>
       )}
+      <p className="app-version">ver {APP_VERSION}</p>
     </main>
   );
 }
