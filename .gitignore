@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 coverage/
+balance-results/
 
 # Archives / exports
 *.zip

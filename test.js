@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 const DEFAULT_RUNS = 1000;
 const DEFAULT_TRACK = 1200;
 const DEFAULT_RUNNERS = 9;
@@ -107,8 +110,8 @@ function createRng(seedValue) {
   };
 }
 
-function pickTrait(rng) {
-  return TRAITS[Math.floor(rng() * TRAITS.length)];
+function pickTrait(rng, traits = TRAITS) {
+  return traits[Math.floor(rng() * traits.length)];
 }
 
 function shuffleInPlace(arr, rng) {
@@ -346,8 +349,8 @@ function phaseKeyFromProgress(progress) {
   return "climax";
 }
 
-function createRunner(name, idx, rng, forcedTrait = null) {
-  const trait = forcedTrait ?? pickTrait(rng);
+function createRunner(name, idx, rng, forcedTrait = null, traits = TRAITS) {
+  const trait = forcedTrait ?? pickTrait(rng, traits);
   const paceProfile = createPaceProfile(trait.id);
   return {
     id: idx + 1,
@@ -372,11 +375,11 @@ function buildNames(count) {
   return names;
 }
 
-function simulateRace(trackMeters, runnerCount, rng) {
-  const effectiveRunnerCount = TRAITS.length;
+function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
+  const effectiveRunnerCount = traits.length;
   const names = buildNames(effectiveRunnerCount);
-  const traitOrder = shuffleInPlace([...TRAITS], rng);
-  const runners = names.map((name, idx) => createRunner(name, idx, rng, traitOrder[idx]));
+  const traitOrder = shuffleInPlace([...traits], rng);
+  const runners = names.map((name, idx) => createRunner(name, idx, rng, traitOrder[idx], traits));
 
   let time = 0;
   let done = 0;
@@ -607,6 +610,23 @@ function simulateRace(trackMeters, runnerCount, rng) {
         }
       }
 
+      // Optional external tuning hook used by auto-balance tooling.
+      const tune = r.trait.tuning;
+      if (tune) {
+        const globalSpeedMul = tune.speedMul ?? 1;
+        const globalDrainMul = tune.drainMul ?? 1;
+        const globalRegenMul = tune.regenMul ?? 1;
+        const globalVarianceMul = tune.varianceMul ?? 1;
+        const earlySpeedMul = progress < 0.33 ? tune.earlySpeedMul ?? 1 : 1;
+        const midSpeedMul = progress >= 0.33 && progress < 0.67 ? tune.midSpeedMul ?? 1 : 1;
+        const lateSpeedMul = progress >= 0.67 ? tune.lateSpeedMul ?? 1 : 1;
+
+        speedMul *= globalSpeedMul * earlySpeedMul * midSpeedMul * lateSpeedMul;
+        drainMul *= globalDrainMul;
+        regen *= globalRegenMul;
+        varMul *= globalVarianceMul;
+      }
+
       if (preserveStrength > 0) {
         speedMul *= 1 - preserveStrength * 0.16;
         drainMul *= 1 - preserveStrength * 0.34;
@@ -656,13 +676,10 @@ function pad(value, len) {
   return `${text}${" ".repeat(len - text.length)}`;
 }
 
-function run() {
-  const opts = parseArgs(process.argv.slice(2));
-  const rng = createRng(opts.seed);
-  const effectiveRunners = TRAITS.length;
-
+function collectStats({ runs = DEFAULT_RUNS, track = DEFAULT_TRACK, seed = null, traits = TRAITS } = {}) {
+  const rng = createRng(seed);
   const stats = new Map();
-  for (const t of TRAITS) {
+  for (const t of traits) {
     stats.set(t.id, {
       id: t.id,
       label: t.label,
@@ -674,8 +691,8 @@ function run() {
     });
   }
 
-  for (let runIdx = 0; runIdx < opts.runs; runIdx += 1) {
-    const results = simulateRace(opts.track, effectiveRunners, rng);
+  for (let runIdx = 0; runIdx < runs; runIdx += 1) {
+    const results = simulateRace(track, traits.length, rng, traits);
     for (let i = 0; i < results.length; i += 1) {
       const r = results[i];
       const rank = i + 1;
@@ -699,6 +716,19 @@ function run() {
     }))
     .sort((a, b) => b.winRate - a.winRate);
 
+  return rows;
+}
+
+function run() {
+  const opts = parseArgs(process.argv.slice(2));
+  const rows = collectStats({
+    runs: opts.runs,
+    track: opts.track,
+    seed: opts.seed,
+    traits: TRAITS
+  });
+  const effectiveRunners = TRAITS.length;
+
   const best = rows[0];
   const worst = rows[rows.length - 1];
 
@@ -720,4 +750,20 @@ function run() {
   console.log("");
 }
 
-run();
+const isMainModule = (() => {
+  if (!process.argv[1]) return false;
+  return path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+})();
+
+if (isMainModule) {
+  run();
+}
+
+export {
+  TRAITS,
+  DEFAULT_RUNS,
+  DEFAULT_TRACK,
+  createRng,
+  collectStats,
+  simulateRace
+};

@@ -111,42 +111,132 @@ const RUNNER_TRAITS = [
 ];
 
 const ULTIMATE_POOL = [
-  { id: "ult-sidewinder", name: "쌍주행 파열", trigger: "side_by_side", needSec: 5, color: "#fb7185", durationSec: 4.6, speedMul: 1.24, flatSpeed: 1.2, staminaDrainMul: 1.06, fatigueIgnore: 0.08, trailBoost: 1.22, hitStopMs: 140 },
-  { id: "ult-echo-link", name: "연쇄 공명", trigger: "chain_react", reactWindowSec: 2.2, color: "#60a5fa", durationSec: 4.2, speedMul: 1.2, flatSpeed: 1.05, staminaDrainMul: 0.98, fatigueIgnore: 0.1, trailBoost: 1.18, hitStopMs: 120 },
-  { id: "ult-last-stand", name: "꼴지 폭주", trigger: "last_place_hold", needSec: 5.4, color: "#ef4444", durationSec: 5, speedMul: 1.26, flatSpeed: 1.3, staminaDrainMul: 1.02, fatigueIgnore: 0.14, trailBoost: 1.35, hitStopMs: 170 },
-  { id: "ult-mid-storm", name: "중반 폭풍", trigger: "phase_middle", minProgress: 0.48, color: "#22d3ee", durationSec: 4.1, speedMul: 1.19, flatSpeed: 1.02, staminaDrainMul: 0.97, fatigueIgnore: 0.08, trailBoost: 1.15, hitStopMs: 110 },
-  { id: "ult-final-drive", name: "종반 각성", trigger: "phase_final", color: "#f97316", durationSec: 4.9, speedMul: 1.25, flatSpeed: 1.22, staminaDrainMul: 1.04, fatigueIgnore: 0.12, trailBoost: 1.3, hitStopMs: 150 },
-  { id: "ult-front-emperor", name: "선두 제왕", trigger: "first_place_hold", needSec: 4, color: "#facc15", durationSec: 4.2, speedMul: 1.18, flatSpeed: 0.92, staminaDrainMul: 0.92, fatigueIgnore: 0.08, trailBoost: 1.12, hitStopMs: 100 },
-  { id: "ult-hunter-gap", name: "격차 사냥", trigger: "big_gap", minGapMeters: 16, color: "#34d399", durationSec: 4.5, speedMul: 1.24, flatSpeed: 1.12, staminaDrainMul: 1, fatigueIgnore: 0.12, trailBoost: 1.24, hitStopMs: 140 },
-  { id: "ult-desperate-heart", name: "절체절명", trigger: "low_stamina", maxStamina: 0.24, color: "#e11d48", durationSec: 5.1, speedMul: 1.27, flatSpeed: 1.36, staminaDrainMul: 0.92, fatigueIgnore: 0.16, staminaRegenPerSec: 0.004, trailBoost: 1.36, hitStopMs: 180 },
-  { id: "ult-full-charge", name: "풀차지 돌입", trigger: "high_stamina_opening", minStamina: 0.86, maxProgress: 0.3, color: "#0ea5e9", durationSec: 3.9, speedMul: 1.21, flatSpeed: 1.02, staminaDrainMul: 1.08, fatigueIgnore: 0.07, trailBoost: 1.2, hitStopMs: 120 },
-  { id: "ult-comeback-sync", name: "역전 공명", trigger: "comeback_active", color: "#fb7185", durationSec: 4.7, speedMul: 1.23, flatSpeed: 1.16, staminaDrainMul: 0.98, fatigueIgnore: 0.13, trailBoost: 1.26, hitStopMs: 150 },
-  { id: "ult-photo-finish", name: "포토피니시 모드", trigger: "duel_top", duelGap: 2.4, color: "#a855f7", durationSec: 4.3, speedMul: 1.22, flatSpeed: 1.15, staminaDrainMul: 1.02, fatigueIgnore: 0.11, trailBoost: 1.25, hitStopMs: 135 },
-  { id: "ult-finish-hawk", name: "피니시 호크", trigger: "near_finish", remainMeters: 170, color: "#f59e0b", durationSec: 3.7, speedMul: 1.26, flatSpeed: 1.3, staminaDrainMul: 1.05, fatigueIgnore: 0.14, trailBoost: 1.34, hitStopMs: 140 },
-  { id: "ult-crowd-crush", name: "밀집 분쇄", trigger: "packed_run", needSec: 4.2, color: "#14b8a6", durationSec: 4.4, speedMul: 1.2, flatSpeed: 1.04, staminaDrainMul: 0.97, fatigueIgnore: 0.09, trailBoost: 1.17, hitStopMs: 110 },
-  { id: "ult-recovery-wave", name: "회복 반전", trigger: "recover_hold", needSec: 4.1, color: "#10b981", durationSec: 4.8, speedMul: 1.22, flatSpeed: 1.08, staminaDrainMul: 0.84, staminaRegenPerSec: 0.009, fatigueIgnore: 0.14, trailBoost: 1.24, hitStopMs: 130 },
-  { id: "ult-cycle-overdrive", name: "사이클 오버드라이브", trigger: "cycle_count", needCycles: 3, minProgress: 0.42, color: "#f43f5e", durationSec: 4.9, speedMul: 1.24, flatSpeed: 1.18, staminaDrainMul: 0.94, fatigueIgnore: 0.14, trailBoost: 1.28, hitStopMs: 150 },
-  { id: "ult-mid-top-control", name: "중반 상위 지배", trigger: "top3_middle", color: "#38bdf8", durationSec: 3.9, speedMul: 1.19, flatSpeed: 0.96, staminaDrainMul: 0.92, fatigueIgnore: 0.08, trailBoost: 1.14, hitStopMs: 110 },
-  { id: "ult-bottom-fury", name: "하위 광분", trigger: "bottom2_final", color: "#ef4444", durationSec: 5, speedMul: 1.27, flatSpeed: 1.34, staminaDrainMul: 0.96, fatigueIgnore: 0.16, trailBoost: 1.38, hitStopMs: 180 },
-  { id: "ult-surge-lock", name: "돌파 고정", trigger: "surge_hold", needSec: 2.2, color: "#06b6d4", durationSec: 4.5, speedMul: 1.22, flatSpeed: 1.06, staminaDrainMul: 0.95, fatigueIgnore: 0.1, trailBoost: 1.2, hitStopMs: 130 },
-  { id: "ult-silent-timer", name: "침묵 타이머", trigger: "no_skill_long", needSec: 11, minProgress: 0.34, color: "#94a3b8", durationSec: 4.4, speedMul: 1.21, flatSpeed: 1.1, staminaDrainMul: 0.93, fatigueIgnore: 0.11, trailBoost: 1.19, hitStopMs: 125 },
-  { id: "ult-crown-guard", name: "왕관 수호", trigger: "lead_late", minProgress: 0.78, color: "#fbbf24", durationSec: 4.3, speedMul: 1.2, flatSpeed: 1, staminaDrainMul: 0.88, fatigueIgnore: 0.1, trailBoost: 1.15, hitStopMs: 115 },
-  { id: "ult-horizon-break", name: "호라이즌 브레이크", trigger: "phase_final", color: "#f97316", durationSec: 5.2, speedMul: 1.31, flatSpeed: 1.4, staminaDrainMul: 1.08, fatigueIgnore: 0.16, trailBoost: 1.42, hitStopMs: 190 },
-  { id: "ult-dragoon-spear", name: "드라군 스피어", trigger: "big_gap", minGapMeters: 20, color: "#06b6d4", durationSec: 5, speedMul: 1.29, flatSpeed: 1.35, staminaDrainMul: 1.02, fatigueIgnore: 0.15, trailBoost: 1.4, hitStopMs: 185 },
-  { id: "ult-apex-duel", name: "에이펙스 듀얼", trigger: "duel_top", duelGap: 1.8, color: "#a855f7", durationSec: 4.8, speedMul: 1.3, flatSpeed: 1.28, staminaDrainMul: 1.04, fatigueIgnore: 0.16, trailBoost: 1.41, hitStopMs: 195 },
-  { id: "ult-skyline-charge", name: "스카이라인 차지", trigger: "near_finish", remainMeters: 220, color: "#f59e0b", durationSec: 4.3, speedMul: 1.33, flatSpeed: 1.46, staminaDrainMul: 1.1, fatigueIgnore: 0.17, trailBoost: 1.45, hitStopMs: 200 },
-  { id: "ult-shockwave-run", name: "쇼크웨이브 런", trigger: "side_by_side", needSec: 6.2, color: "#fb7185", durationSec: 5.4, speedMul: 1.32, flatSpeed: 1.38, staminaDrainMul: 1.06, fatigueIgnore: 0.18, trailBoost: 1.46, hitStopMs: 205 },
-  { id: "ult-spiral-gate", name: "스파이럴 게이트", trigger: "cycle_count", needCycles: 4, minProgress: 0.5, color: "#f43f5e", durationSec: 5.3, speedMul: 1.31, flatSpeed: 1.36, staminaDrainMul: 0.99, fatigueIgnore: 0.17, trailBoost: 1.44, hitStopMs: 188 },
-  { id: "ult-mind-breaker", name: "마인드 브레이커", trigger: "no_skill_long", needSec: 13, minProgress: 0.38, color: "#94a3b8", durationSec: 5.1, speedMul: 1.28, flatSpeed: 1.3, staminaDrainMul: 0.96, fatigueIgnore: 0.15, trailBoost: 1.38, hitStopMs: 178 },
-  { id: "ult-rally-crest", name: "랠리 크레스트", trigger: "recover_hold", needSec: 5.2, color: "#10b981", durationSec: 5.5, speedMul: 1.3, flatSpeed: 1.26, staminaDrainMul: 0.9, staminaRegenPerSec: 0.01, fatigueIgnore: 0.18, trailBoost: 1.4, hitStopMs: 176 },
-  { id: "ult-understorm", name: "언더스톰", trigger: "bottom2_final", color: "#ef4444", durationSec: 5.6, speedMul: 1.35, flatSpeed: 1.52, staminaDrainMul: 1.02, fatigueIgnore: 0.2, trailBoost: 1.5, hitStopMs: 220 },
-  { id: "ult-vanguard-throne", name: "뱅가드 쓰론", trigger: "first_place_hold", needSec: 5, color: "#fbbf24", durationSec: 4.9, speedMul: 1.27, flatSpeed: 1.18, staminaDrainMul: 0.9, fatigueIgnore: 0.15, trailBoost: 1.34, hitStopMs: 165 },
-  { id: "ult-time-stop", name: "크로노 락", trigger: "duel_top", duelGap: 2.1, color: "#60a5fa", durationSec: 4.2, speedMul: 1.26, flatSpeed: 1.25, staminaDrainMul: 1.05, fatigueIgnore: 0.16, trailBoost: 1.42, hitStopMs: 220, specialKind: "time_stop", timeStopSec: 3 },
-  { id: "ult-dice-jackpot", name: "잭팟 다이스", trigger: "phase_middle", minProgress: 0.52, color: "#f97316", durationSec: 4.4, speedMul: 1.2, flatSpeed: 0.8, staminaDrainMul: 1.02, fatigueIgnore: 0.1, trailBoost: 1.24, hitStopMs: 145, specialKind: "dice", diceSpeedPerPip: 0.048, diceFlatPerPip: 0.5 },
-  { id: "ult-warp-step", name: "워프 스텝", trigger: "near_finish", remainMeters: 280, color: "#a855f7", durationSec: 3.8, speedMul: 1.22, flatSpeed: 1.05, staminaDrainMul: 1.04, fatigueIgnore: 0.14, trailBoost: 1.36, hitStopMs: 180, specialKind: "blink", blinkMeters: 34, blinkTrackRatio: 0.016 },
-  { id: "ult-all-in", name: "올인 오버드라이브", trigger: "low_stamina", maxStamina: 0.36, color: "#ef4444", durationSec: 4.9, speedMul: 1.24, flatSpeed: 1.12, staminaDrainMul: 1.08, fatigueIgnore: 0.15, trailBoost: 1.38, hitStopMs: 185, specialKind: "all_in", burstStaminaCost: 0.19 },
-  { id: "ult-vacuum-field", name: "베큠 필드", trigger: "packed_run", needSec: 5.2, color: "#14b8a6", durationSec: 5.1, speedMul: 1.2, flatSpeed: 1.05, staminaDrainMul: 0.96, fatigueIgnore: 0.13, trailBoost: 1.33, hitStopMs: 175, specialKind: "drain_field", specialDragAura: 0.13, specialDragRange: 15, specialRegenPerSec: 0.0058 }
+  { id: "ult-sidewinder", name: "쌍주행 파열", trigger: "side_by_side", needSec: 5, color: "#fb7185", durationSec: 5.15, speedMul: 1.432, flatSpeed: 2.28, staminaDrainMul: 1.06, fatigueIgnore: 0.08, trailBoost: 1.22, hitStopMs: 140 },
+  { id: "ult-echo-link", name: "연쇄 공명", trigger: "chain_react", reactWindowSec: 2.2, color: "#60a5fa", durationSec: 4.7, speedMul: 1.36, flatSpeed: 1.99, staminaDrainMul: 0.98, fatigueIgnore: 0.1, trailBoost: 1.18, hitStopMs: 120 },
+  { id: "ult-last-stand", name: "꼴지 폭주", trigger: "last_place_hold", needSec: 5.4, color: "#ef4444", durationSec: 5.6, speedMul: 1.468, flatSpeed: 2.47, staminaDrainMul: 1.02, fatigueIgnore: 0.14, trailBoost: 1.35, hitStopMs: 170 },
+  { id: "ult-mid-storm", name: "중반 폭풍", trigger: "phase_middle", minProgress: 0.48, color: "#22d3ee", durationSec: 4.59, speedMul: 1.342, flatSpeed: 1.94, staminaDrainMul: 0.97, fatigueIgnore: 0.08, trailBoost: 1.15, hitStopMs: 110 },
+  { id: "ult-final-drive", name: "종반 각성", trigger: "phase_final", color: "#f97316", durationSec: 5.49, speedMul: 1.45, flatSpeed: 2.32, staminaDrainMul: 1.04, fatigueIgnore: 0.12, trailBoost: 1.3, hitStopMs: 150 },
+  { id: "ult-front-emperor", name: "선두 제왕", trigger: "first_place_hold", needSec: 4, color: "#facc15", durationSec: 4.79, speedMul: 1.36, flatSpeed: 1.93, staminaDrainMul: 0.92, fatigueIgnore: 0.08, trailBoost: 1.12, hitStopMs: 100 },
+  { id: "ult-hunter-gap", name: "격차 사냥", trigger: "big_gap", minGapMeters: 16, color: "#34d399", durationSec: 5.04, speedMul: 1.432, flatSpeed: 2.13, staminaDrainMul: 1, fatigueIgnore: 0.12, trailBoost: 1.24, hitStopMs: 140 },
+  { id: "ult-desperate-heart", name: "절체절명", trigger: "low_stamina", maxStamina: 0.24, color: "#e11d48", durationSec: 5.71, speedMul: 1.486, flatSpeed: 2.58, staminaDrainMul: 0.92, fatigueIgnore: 0.16, staminaRegenPerSec: 0.004, trailBoost: 1.36, hitStopMs: 180 },
+  { id: "ult-full-charge", name: "풀차지 돌입", trigger: "high_stamina_opening", minStamina: 0.86, maxProgress: 0.3, color: "#0ea5e9", durationSec: 4.37, speedMul: 1.378, flatSpeed: 1.94, staminaDrainMul: 1.08, fatigueIgnore: 0.07, trailBoost: 1.2, hitStopMs: 120 },
+  { id: "ult-comeback-sync", name: "역전 공명", trigger: "comeback_active", color: "#fb7185", durationSec: 5.26, speedMul: 1.414, flatSpeed: 2.2, staminaDrainMul: 0.98, fatigueIgnore: 0.13, trailBoost: 1.26, hitStopMs: 150 },
+  { id: "ult-photo-finish", name: "포토피니시 모드", trigger: "duel_top", duelGap: 2.4, color: "#a855f7", durationSec: 4.82, speedMul: 1.396, flatSpeed: 2.18, staminaDrainMul: 1.02, fatigueIgnore: 0.11, trailBoost: 1.25, hitStopMs: 135 },
+  { id: "ult-finish-hawk", name: "피니시 호크", trigger: "near_finish", remainMeters: 170, color: "#f59e0b", durationSec: 4.14, speedMul: 1.468, flatSpeed: 2.47, staminaDrainMul: 1.05, fatigueIgnore: 0.14, trailBoost: 1.34, hitStopMs: 140 },
+  { id: "ult-crowd-crush", name: "밀집 분쇄", trigger: "packed_run", needSec: 4.2, color: "#14b8a6", durationSec: 4.93, speedMul: 1.36, flatSpeed: 1.98, staminaDrainMul: 0.97, fatigueIgnore: 0.09, trailBoost: 1.17, hitStopMs: 110 },
+  { id: "ult-recovery-wave", name: "회복 반전", trigger: "recover_hold", needSec: 4.1, color: "#10b981", durationSec: 5.47, speedMul: 1.422, flatSpeed: 2.18, staminaDrainMul: 0.84, staminaRegenPerSec: 0.009, fatigueIgnore: 0.14, trailBoost: 1.24, hitStopMs: 130 },
+  { id: "ult-cycle-overdrive", name: "사이클 오버드라이브", trigger: "cycle_count", needCycles: 3, minProgress: 0.42, color: "#f43f5e", durationSec: 5.49, speedMul: 1.432, flatSpeed: 2.24, staminaDrainMul: 0.94, fatigueIgnore: 0.14, trailBoost: 1.28, hitStopMs: 150 },
+  { id: "ult-mid-top-control", name: "중반 상위 지배", trigger: "top3_middle", color: "#38bdf8", durationSec: 4.45, speedMul: 1.38, flatSpeed: 2.02, staminaDrainMul: 0.92, fatigueIgnore: 0.08, trailBoost: 1.14, hitStopMs: 110 },
+  { id: "ult-bottom-fury", name: "하위 광분", trigger: "bottom2_final", color: "#ef4444", durationSec: 5.6, speedMul: 1.486, flatSpeed: 2.55, staminaDrainMul: 0.96, fatigueIgnore: 0.16, trailBoost: 1.38, hitStopMs: 180 },
+  { id: "ult-surge-lock", name: "돌파 고정", trigger: "surge_hold", needSec: 2.2, color: "#06b6d4", durationSec: 5.04, speedMul: 1.396, flatSpeed: 2.01, staminaDrainMul: 0.95, fatigueIgnore: 0.1, trailBoost: 1.2, hitStopMs: 130 },
+  { id: "ult-silent-timer", name: "침묵 타이머", trigger: "no_skill_long", needSec: 11, minProgress: 0.34, color: "#94a3b8", durationSec: 4.93, speedMul: 1.378, flatSpeed: 2.09, staminaDrainMul: 0.93, fatigueIgnore: 0.11, trailBoost: 1.19, hitStopMs: 125 },
+  { id: "ult-crown-guard", name: "왕관 수호", trigger: "lead_late", minProgress: 0.78, color: "#fbbf24", durationSec: 4.9, speedMul: 1.4, flatSpeed: 2.1, staminaDrainMul: 0.88, fatigueIgnore: 0.1, trailBoost: 1.15, hitStopMs: 115 },
+  { id: "ult-horizon-break", name: "호라이즌 브레이크", trigger: "phase_final", color: "#f97316", durationSec: 5.62, speedMul: 1.45, flatSpeed: 2.31, staminaDrainMul: 1.08, fatigueIgnore: 0.16, trailBoost: 1.42, hitStopMs: 190 },
+  { id: "ult-dragoon-spear", name: "드라군 스피어", trigger: "big_gap", minGapMeters: 20, color: "#06b6d4", durationSec: 5.4, speedMul: 1.421, flatSpeed: 2.23, staminaDrainMul: 1.02, fatigueIgnore: 0.15, trailBoost: 1.4, hitStopMs: 185 },
+  { id: "ult-apex-duel", name: "에이펙스 듀얼", trigger: "duel_top", duelGap: 1.8, color: "#a855f7", durationSec: 5.18, speedMul: 1.435, flatSpeed: 2.11, staminaDrainMul: 1.04, fatigueIgnore: 0.16, trailBoost: 1.41, hitStopMs: 195 },
+  { id: "ult-skyline-charge", name: "스카이라인 차지", trigger: "near_finish", remainMeters: 220, color: "#f59e0b", durationSec: 4.64, speedMul: 1.479, flatSpeed: 2.41, staminaDrainMul: 1.1, fatigueIgnore: 0.17, trailBoost: 1.45, hitStopMs: 200 },
+  { id: "ult-shockwave-run", name: "쇼크웨이브 런", trigger: "side_by_side", needSec: 6.2, color: "#fb7185", durationSec: 5.83, speedMul: 1.464, flatSpeed: 2.28, staminaDrainMul: 1.06, fatigueIgnore: 0.18, trailBoost: 1.46, hitStopMs: 205 },
+  { id: "ult-spiral-gate", name: "스파이럴 게이트", trigger: "cycle_count", needCycles: 4, minProgress: 0.5, color: "#f43f5e", durationSec: 5.72, speedMul: 1.45, flatSpeed: 2.24, staminaDrainMul: 0.99, fatigueIgnore: 0.17, trailBoost: 1.44, hitStopMs: 188 },
+  { id: "ult-mind-breaker", name: "마인드 브레이커", trigger: "no_skill_long", needSec: 13, minProgress: 0.38, color: "#94a3b8", durationSec: 5.71, speedMul: 1.504, flatSpeed: 2.47, staminaDrainMul: 0.96, fatigueIgnore: 0.15, trailBoost: 1.38, hitStopMs: 178 },
+  { id: "ult-rally-crest", name: "랠리 크레스트", trigger: "recover_hold", needSec: 5.2, color: "#10b981", durationSec: 6.27, speedMul: 1.576, flatSpeed: 2.55, staminaDrainMul: 0.9, staminaRegenPerSec: 0.01, fatigueIgnore: 0.18, trailBoost: 1.4, hitStopMs: 176 },
+  { id: "ult-understorm", name: "언더스톰", trigger: "bottom2_final", color: "#ef4444", durationSec: 6.05, speedMul: 1.508, flatSpeed: 2.51, staminaDrainMul: 1.02, fatigueIgnore: 0.2, trailBoost: 1.5, hitStopMs: 220 },
+  { id: "ult-vanguard-throne", name: "뱅가드 쓰론", trigger: "first_place_hold", needSec: 5, color: "#fbbf24", durationSec: 5.49, speedMul: 1.486, flatSpeed: 2.24, staminaDrainMul: 0.9, fatigueIgnore: 0.15, trailBoost: 1.34, hitStopMs: 165 },
+  { id: "ult-time-stop", name: "크로노 락", trigger: "duel_top", duelGap: 2.1, color: "#60a5fa", durationSec: 4.54, speedMul: 1.351, flatSpeed: 1.81, staminaDrainMul: 1.05, fatigueIgnore: 0.16, trailBoost: 1.42, hitStopMs: 220, specialKind: "time_stop", timeStopSec: 3 },
+  {
+    id: "ult-dice-jackpot",
+    name: "잭팟 다이스",
+    trigger: "phase_middle",
+    minProgress: 0.52,
+    color: "#f97316",
+    durationSec: 4.75,
+    speedMul: 1.24,
+    flatSpeed: 1,
+    staminaDrainMul: 1.02,
+    fatigueIgnore: 0.1,
+    trailBoost: 1.24,
+    hitStopMs: 145,
+    specialKind: "dice",
+    diceSpeedPerPip: 0.042,
+    diceFlatPerPip: 0.42,
+    diceFailStaminaCost: 0.09,
+    diceJackpotSpeedMul: 1.42,
+    diceJackpotFlatBonus: 4.4
+  },
+  {
+    id: "ult-meteor-strike",
+    name: "메테오 스트라이크",
+    trigger: "big_gap",
+    minGapMeters: 18,
+    color: "#f97316",
+    durationSec: 4.6,
+    speedMul: 1.24,
+    flatSpeed: 1.18,
+    staminaDrainMul: 1.03,
+    fatigueIgnore: 0.15,
+    trailBoost: 1.4,
+    hitStopMs: 208,
+    specialKind: "meteor",
+    meteorJumpSec: 0.98,
+    meteorLeapMeters: 38,
+    meteorTrackRatio: 0.018,
+    meteorApexPx: 96,
+    meteorImpactRange: 13,
+    meteorImpactDrag: 0.1,
+    meteorImpactDrain: 0.12,
+    meteorStaminaCost: 0.035
+  },
+  {
+    id: "ult-leader-shadow",
+    name: "리더 섀도우",
+    trigger: "near_finish",
+    remainMeters: 210,
+    minProgress: 0.78,
+    color: "#22d3ee",
+    durationSec: 6.57,
+    speedMul: 1.138,
+    flatSpeed: 1.03,
+    staminaDrainMul: 1.03,
+    fatigueIgnore: 0.13,
+    trailBoost: 1.32,
+    hitStopMs: 175,
+    specialKind: "leader_snap",
+    snapGapMeters: 1.4,
+    snapCatchupMul: 0.95,
+    snapCatchupFlat: 2.8
+  },
+  { id: "ult-warp-step", name: "워프 스텝", trigger: "near_finish", remainMeters: 280, color: "#a855f7", durationSec: 4.18, speedMul: 1.297, flatSpeed: 1.52, staminaDrainMul: 1.04, fatigueIgnore: 0.14, trailBoost: 1.36, hitStopMs: 180, specialKind: "blink", blinkMeters: 34, blinkTrackRatio: 0.016 },
+  { id: "ult-all-in", name: "올인 오버드라이브", trigger: "low_stamina", maxStamina: 0.36, color: "#ef4444", durationSec: 5.29, speedMul: 1.312, flatSpeed: 1.62, staminaDrainMul: 1.08, fatigueIgnore: 0.15, trailBoost: 1.38, hitStopMs: 185, specialKind: "all_in", burstStaminaCost: 0.19 },
+  { id: "ult-vacuum-field", name: "베큠 필드", trigger: "packed_run", needSec: 5.2, color: "#14b8a6", durationSec: 5.86, speedMul: 1.34, flatSpeed: 1.94, staminaDrainMul: 0.96, fatigueIgnore: 0.13, trailBoost: 1.33, hitStopMs: 175, specialKind: "drain_field", specialDragAura: 0.13, specialDragRange: 15, specialRegenPerSec: 0.0058 }
 ];
+
+const SKILL_EFFECT_META = {
+  burst: { code: "SPD", label: "가속" },
+  tempo: { code: "TEMPO", label: "리듬" },
+  late: { code: "FIN", label: "종반" },
+  chase: { code: "JUMP", label: "도약" },
+  gamble: { code: "RISK", label: "도박" },
+  draft: { code: "SLIP", label: "슬립" },
+  guard: { code: "GUARD", label: "집중" },
+  breakaway: { code: "LEAD", label: "도주" },
+  pressure: { code: "AURA", label: "압박" },
+  duel: { code: "DUEL", label: "결투" },
+  recover: { code: "REC", label: "회복" },
+  default: { code: "SKILL", label: "스킬" }
+};
+
+const ULTIMATE_EFFECT_META = {
+  time_stop: { code: "TIME", label: "시간정지" },
+  dice: { code: "DICE", label: "주사위" },
+  blink: { code: "BLINK", label: "순간도약" },
+  all_in: { code: "ALLIN", label: "올인" },
+  drain_field: { code: "FIELD", label: "흡수장" },
+  meteor: { code: "METEOR", label: "메테오" },
+  leader_snap: { code: "SNAP", label: "리더추격" },
+  default: { code: "ULT", label: "궁극기" }
+};
+
+const effectMetaForSkill = (skill) => SKILL_EFFECT_META[skill?.kind] ?? SKILL_EFFECT_META.default;
+const effectMetaForUltimate = (ult) => ULTIMATE_EFFECT_META[ult?.specialKind] ?? ULTIMATE_EFFECT_META.default;
 
 const clamp = (v, mn, mx) => Math.min(mx, Math.max(mn, v));
 const lerp = (a, b, r) => a + (b - a) * r;
@@ -411,9 +501,10 @@ function buildSkillPool() {
           triggerChance: lerp(0.09, 0.15, t1),
           cooldownSec: lerp(6.4, 11, t2),
           durationSec: lerp(2.5, 4.6, t3),
-          speedMul: lerp(1.03, 1.1, t1),
+          speedMul: lerp(0.995, 1.03, t1),
           varianceMul: lerp(0.72, 0.9, t2),
-          staminaDrainMul: lerp(0.82, 0.95, t4)
+          staminaDrainMul: lerp(0.78, 0.93, t4),
+          tempoFocus: lerp(0.03, 0.09, t3)
         });
       }
       if (type.id === "late") {
@@ -430,11 +521,15 @@ function buildSkillPool() {
         Object.assign(skill, {
           triggerChance: lerp(0.1, 0.16, t1),
           cooldownSec: lerp(5.8, 9.5, t2),
-          durationSec: lerp(1.5, 2.9, t3),
-          speedMul: lerp(1.05, 1.13, t1),
+          durationSec: lerp(0.9, 1.8, t3),
+          speedMul: lerp(1.0, 1.04, t1),
           minGapMeters: lerp(6, 20, t2),
-          gapPerMeter: lerp(0.004, 0.009, t3),
-          maxGapMul: lerp(0.2, 0.32, t4)
+          gapPerMeter: lerp(0.003, 0.006, t3),
+          maxGapMul: lerp(0.1, 0.18, t4),
+          minLeapMeters: lerp(2.2, 4.8, t1),
+          maxLeapMeters: lerp(6, 14, t2),
+          gapJumpPerMeter: lerp(0.12, 0.28, t3),
+          leapStaminaCost: lerp(0.012, 0.038, t4)
         });
       }
       if (type.id === "gamble") {
@@ -488,9 +583,11 @@ function buildSkillPool() {
           triggerChance: lerp(0.08, 0.14, t1),
           cooldownSec: lerp(7, 11, t2),
           durationSec: lerp(1.4, 2.4, t3),
-          speedMul: lerp(1.03, 1.09, t1),
+          speedMul: lerp(1.0, 1.04, t1),
           auraRange: lerp(6, 15, t2),
-          auraDrag: lerp(0.03, 0.09, t3)
+          auraDrag: lerp(0.02, 0.06, t3),
+          auraDrain: lerp(0.05, 0.16, t4),
+          auraRegenCut: lerp(0.0005, 0.0026, t1)
         });
       }
       if (type.id === "duel") {
@@ -498,9 +595,11 @@ function buildSkillPool() {
           triggerChance: lerp(0.1, 0.17, t1),
           cooldownSec: lerp(5.4, 9.4, t2),
           durationSec: lerp(1.4, 2.6, t3),
-          speedMul: lerp(1.05, 1.14, t1),
+          speedMul: lerp(1.0, 1.03, t1),
           duelRange: lerp(4, 10, t2),
-          duelScale: lerp(0.08, 0.19, t3)
+          duelScale: lerp(0.02, 0.08, t3),
+          duelDrainPerSec: lerp(0.06, 0.24, t4),
+          duelFocusBonus: lerp(0.03, 0.12, t1)
         });
       }
       if (type.id === "recover") {
@@ -600,7 +699,11 @@ function createStaminaPlan(traitId) {
     plan.opening += 0.05;
     plan.middle += 0.05;
     plan.final -= 0.01;
-  } else if (traitId === "front_runner" || traitId === "sprinter") {
+  } else if (traitId === "front_runner") {
+    plan.opening -= 0.03;
+    plan.middle -= 0.02;
+    plan.final += 0.02;
+  } else if (traitId === "sprinter") {
     plan.opening -= 0.08;
     plan.middle -= 0.06;
     plan.final += 0.02;
@@ -691,17 +794,17 @@ function createPaceProfile(traitId) {
     });
   } else if (traitId === "front_runner") {
     Object.assign(base, {
-      runMinSec: 3.8,
-      runMaxSec: 5.8,
-      recoverMinSec: 0.9,
-      recoverMaxSec: 1.6,
+      runMinSec: 2.9,
+      runMaxSec: 4.7,
+      recoverMinSec: 1.1,
+      recoverMaxSec: 2.1,
       runSpeedMul: 1.56,
-      recoverSpeedMul: 0.78,
-      runDrainMul: 1.95,
-      recoverDrainMul: 0.28,
-      recoverRegenPerSec: 0.0041,
-      recoverStartStamina: 0.4,
-      resumeStamina: 0.67,
+      recoverSpeedMul: 0.8,
+      runDrainMul: 1.58,
+      recoverDrainMul: 0.24,
+      recoverRegenPerSec: 0.0052,
+      recoverStartStamina: 0.42,
+      resumeStamina: 0.72,
       lateRunBias: 0.9
     });
   } else if (traitId === "closer") {
@@ -886,6 +989,20 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
       activeEffects: [],
       lastSkillName: "",
       lastSkillUntil: 0,
+      airborneStart: 0,
+      airborneUntil: 0,
+      airborneFrom: 0,
+      airborneTo: 0,
+      airborneApex: 0,
+      airborneColor: "",
+      airborneTrailAt: 0,
+      airborneLandPending: false,
+      airborneImpactRange: 0,
+      airborneImpactDrag: 0,
+      airborneImpactDrain: 0,
+      landingFxUntil: 0,
+      landingFxColor: "",
+      landingFxPower: 1,
       finishedAt: null
     };
   });
@@ -910,6 +1027,20 @@ function prepareRunnersForRace(baseRunners) {
       activeEffects: [],
       lastSkillName: "",
       lastSkillUntil: 0,
+      airborneStart: 0,
+      airborneUntil: 0,
+      airborneFrom: 0,
+      airborneTo: 0,
+      airborneApex: 0,
+      airborneColor: "",
+      airborneTrailAt: 0,
+      airborneLandPending: false,
+      airborneImpactRange: 0,
+      airborneImpactDrag: 0,
+      airborneImpactDrain: 0,
+      landingFxUntil: 0,
+      landingFxColor: "",
+      landingFxPower: 1,
       finishedAt: null,
       staminaPlan,
       paceProfile,
@@ -996,10 +1127,12 @@ function ultimateDifficulty(ult) {
       break;
   }
   if (ult?.specialKind === "time_stop") base += 0.18;
-  if (ult?.specialKind === "dice") base += 0.05;
+  if (ult?.specialKind === "dice") base += 0.1;
   if (ult?.specialKind === "blink") base += 0.1;
   if (ult?.specialKind === "all_in") base += 0.12;
   if (ult?.specialKind === "drain_field") base += 0.1;
+  if (ult?.specialKind === "meteor") base += 0.16;
+  if (ult?.specialKind === "leader_snap") base += 0.14;
   return clamp(base, 1, 2.1);
 }
 
@@ -1055,7 +1188,12 @@ function buildCards(race) {
     .map((r, i) => {
       const active = r.activeEffects.filter((e) => e.startsAt <= race.elapsed && e.expiresAt > race.elapsed);
       const comebackActive = r.comebackActiveUntil > race.elapsed;
-      const activeSkillText = active.length ? active.slice(0, 2).map((e) => e.name).join(", ") : "";
+      const activeSkillText = active.length
+        ? active
+            .slice(0, 2)
+            .map((e) => (e.effectCode ? `[${e.effectCode}] ${e.name}` : e.name))
+            .join(", ")
+        : "";
       return {
         id: r.id,
         rank: i + 1,
@@ -1157,17 +1295,22 @@ export default function App() {
     timeStopUntil: 0,
     timeStopRunnerId: "",
     timeStopColor: "#60a5fa",
+    cameraFocusId: "",
+    cameraFocusLockUntil: 0,
+    cameraEventFocusId: "",
+    cameraEventUntil: 0,
+    cameraEventKind: "",
     runners: [],
     particles: [],
     prevRanks: new Map(),
     lastHudSyncAt: 0
   });
 
-  const appendRaceLog = (text, color = "#1e293b") => {
+  const appendRaceLog = (text, color = "#1e293b", badge = "") => {
     const sec = raceRef.current?.elapsed ?? 0;
     const mm = String(Math.floor(sec / 60)).padStart(2, "0");
     const ss = String(Math.floor(sec % 60)).padStart(2, "0");
-    const next = { id: `${Date.now()}-${Math.floor(Math.random() * 9999)}`, text, color, time: `${mm}:${ss}` };
+    const next = { id: `${Date.now()}-${Math.floor(Math.random() * 9999)}`, text, color, time: `${mm}:${ss}`, badge };
     setRaceLogs((prev) => [...prev, next].slice(-90));
   };
 
@@ -1353,8 +1496,11 @@ export default function App() {
       let w = 1;
       if (s.kind === "late") w += clamp((c.progress - 0.55) * 2.6, 0, 1.2);
       if (s.kind === "chase") w += clamp(c.gapLeader / 20, 0, 1.2);
+      if (s.kind === "chase" && race.phaseKey !== "opening") w += 0.45;
+      if (s.kind === "tempo" && race.phaseKey === "middle") w += 0.5;
       if (s.kind === "duel" && c.closeGap < 6) w += 1.1;
       if (s.kind === "pressure" && c.rank <= 2) w += 0.6;
+      if (s.kind === "pressure" && c.rank <= 4) w += 0.35;
       if (s.kind === "breakaway" && (race.phaseKey === "final" || race.phaseKey === "climax")) w += 0.8;
       if (s.kind === "gamble" && race.phaseKey === "climax") w += 0.9;
       if (s.kind === "recover") w += clamp(((s.triggerStaminaMax ?? 0.72) - runner.stamina) * 7, 0, 1.9);
@@ -1377,6 +1523,7 @@ export default function App() {
     if (!avail.length) return;
 
     const skill = weightedSkill(avail, c, race, runner);
+    const skillMeta = effectMetaForSkill(skill);
     let traitSkillChanceMul = 1;
     if (runner.traitId === "tactician") traitSkillChanceMul = 1.24;
     if (runner.traitId === "risk_taker") traitSkillChanceMul = 1.12;
@@ -1420,9 +1567,12 @@ export default function App() {
     }
 
     let color = skill.color;
+    let castExtraText = "";
     const effect = {
       id: `${skill.id}-${race.elapsed.toFixed(3)}-${Math.floor(Math.random() * 9999)}`,
       name: `[${skill.rank}] ${skill.name}`,
+      effectCode: skillMeta.code,
+      effectLabel: skillMeta.label,
       startsAt: race.elapsed,
       expiresAt: race.elapsed + skill.durationSec,
       noStaminaCost: false,
@@ -1435,10 +1585,14 @@ export default function App() {
       debuffResist: 1,
       dragAura: 0,
       dragRange: 0,
+      enemyDrainAura: 0,
+      enemyRegenCut: 0,
       dynamicDraft: false,
       draftMaxGap: 0,
       duelRange: 0,
       duelScale: 0,
+      duelDrainPerSec: 0,
+      duelFocusBonus: 0,
       color: skill.color
     };
 
@@ -1450,6 +1604,7 @@ export default function App() {
       effect.speedMul = skill.speedMul;
       effect.varianceMul = skill.varianceMul;
       effect.staminaDrainMul = skill.staminaDrainMul;
+      effect.fatigueIgnore = skill.tempoFocus ?? 0;
     }
     if (skill.kind === "late") {
       effect.speedMul = skill.speedMul + Math.max(0, c.progress - skill.minProgress) * skill.finishScale;
@@ -1457,6 +1612,20 @@ export default function App() {
     }
     if (skill.kind === "chase") {
       effect.speedMul = skill.speedMul + Math.min(skill.maxGapMul, c.gapLeader * skill.gapPerMeter);
+      const leapMeters = clamp(
+        (skill.minLeapMeters ?? 2) + Math.max(0, c.gapLeader) * (skill.gapJumpPerMeter ?? 0.16),
+        skill.minLeapMeters ?? 2,
+        skill.maxLeapMeters ?? 10
+      );
+      const before = runner.distance;
+      runner.distance = Math.min(race.trackMeters, runner.distance + leapMeters);
+      const moved = Math.max(0, runner.distance - before);
+      if ((runner.finishedAt === null || runner.finishedAt === undefined) && runner.distance >= race.trackMeters) {
+        runner.finishedAt = race.elapsed + Math.random() * 0.000001;
+      }
+      runner.stamina = clamp(runner.stamina - (skill.leapStaminaCost ?? 0.02), 0.04, 1);
+      castExtraText = ` / 추격도약 +${moved.toFixed(1)}m`;
+      emitBurstParticles(race, runner, "#22c55e", Math.round(14 * (skill.particleCount ?? 1)), 1.05, "#bbf7d0");
     }
     if (skill.kind === "gamble") {
       if (Math.random() < skill.backfireChance) {
@@ -1495,6 +1664,8 @@ export default function App() {
       runner.activeEffects.push({
         id: `${skill.id}-recoil-${race.elapsed.toFixed(3)}`,
         name: `${skill.name} 후딜`,
+        effectCode: "RECOIL",
+        effectLabel: "후딜",
         startsAt: effect.expiresAt,
         expiresAt: effect.expiresAt + skill.recoilDuration,
         noStaminaCost: false,
@@ -1507,10 +1678,14 @@ export default function App() {
         debuffResist: 1,
         dragAura: 0,
         dragRange: 0,
+        enemyDrainAura: 0,
+        enemyRegenCut: 0,
         dynamicDraft: false,
         draftMaxGap: 0,
         duelRange: 0,
         duelScale: 0,
+        duelDrainPerSec: 0,
+        duelFocusBonus: 0,
         color: "#64748b"
       });
     }
@@ -1518,16 +1693,22 @@ export default function App() {
       effect.speedMul = skill.speedMul;
       effect.dragAura = skill.auraDrag;
       effect.dragRange = skill.auraRange;
+      effect.enemyDrainAura = skill.auraDrain ?? 0;
+      effect.enemyRegenCut = skill.auraRegenCut ?? 0;
+      castExtraText = " / 압박영역 전개";
     }
     if (skill.kind === "duel") {
       effect.speedMul = skill.speedMul;
       effect.duelRange = skill.duelRange;
       effect.duelScale = skill.duelScale;
+      effect.duelDrainPerSec = skill.duelDrainPerSec ?? 0;
+      effect.duelFocusBonus = skill.duelFocusBonus ?? 0;
+      castExtraText = " / 근접 소모전";
     }
 
     runner.cooldownUntil[skill.id] = race.elapsed + skill.cooldownSec;
     runner.activeEffects.push(effect);
-    runner.lastSkillName = `[${skill.rank}] ${skill.name}`;
+    runner.lastSkillName = `[${skillMeta.code}] [${skill.rank}] ${skill.name}`;
     runner.lastSkillUntil = race.elapsed + Math.min(2.2, skill.durationSec + 0.25);
     runner.lastSkillCastAt = race.elapsed;
     playSkillSfx();
@@ -1536,8 +1717,9 @@ export default function App() {
     emitBurstParticles(race, runner, color, particleCount, particlePower, skill.rankColor);
     emitBurstParticles(race, runner, "#f8fafc", Math.max(5, Math.floor(particleCount * 0.34)), particlePower * 0.75, skill.rankColor);
     appendRaceLog(
-      `${runner.name} 스킬 [${skill.rank}] ${skill.kindLabel} ${skill.name} 발동`,
-      color
+      `${runner.name} 스킬 [${skill.rank}] ${skill.kindLabel} ${skill.name} 발동${castExtraText}`,
+      color,
+      skillMeta.code
     );
 
     if (race.elapsed >= race.nextNoteAllowed && (c.rank <= 3 || skill.kind === "duel" || skill.kind === "gamble")) {
@@ -1557,6 +1739,7 @@ export default function App() {
     runner.nextUltimateCheckAt += 0.22;
 
     const ult = runner.ultimate;
+    const ultMeta = effectMetaForUltimate(ult);
     let ready = false;
 
     if (ult.trigger === "side_by_side") ready = runner.sideBySideSec >= (ult.needSec ?? 5);
@@ -1586,9 +1769,12 @@ export default function App() {
     if (ult.trigger === "no_skill_long")
       ready = race.elapsed - (runner.lastSkillCastAt ?? 0) >= (ult.needSec ?? 11) && c.progress >= (ult.minProgress ?? 0.34);
     if (ult.trigger === "lead_late") ready = c.rank === 1 && c.progress >= (ult.minProgress ?? 0.78);
+    if (ult.specialKind === "leader_snap") {
+      ready = ready && c.rank > 1 && c.progress >= (ult.minProgress ?? 0.78);
+    }
 
     let randomFallback = false;
-    if (!ready && c.progress >= 0.58) {
+    if (!ready && c.progress >= 0.58 && !(ult.specialKind === "leader_snap" && c.progress < (ult.minProgress ?? 0.78))) {
       const progressFactor = clamp((c.progress - 0.58) / 0.42, 0, 1);
       const rankFactor = fieldSize > 1 ? clamp((c.rank - 1) / (fieldSize - 1), 0, 1) : 0;
       const fallbackChance = clamp(0.04 + progressFactor * 0.22 + rankFactor * 0.08 + race.intensity * 0.06, 0.04, 0.42);
@@ -1616,18 +1802,92 @@ export default function App() {
     let specialDragAura = 0;
     let specialDragRange = 0;
     let specialRegenPerSec = 0;
+    let specialEnemyDrainAura = 0;
+    let specialEnemyRegenCut = 0;
+    let specialDuelRange = 0;
+    let specialDuelScale = 0;
+    let specialDuelDrain = 0;
+    let specialDebuffResist = 0.74;
+    let specialNoStaminaCost = false;
+    let specialLeaderSnap = false;
+    let specialSnapGapMeters = 1.4;
+    let specialSnapCatchupMul = 0.95;
+    let specialSnapCatchupFlat = 2.8;
+    const appendSpecialTag = (tag) => {
+      specialLogText += ` / ${tag}`;
+    };
     const msSinceFx = ts - (race.lastScreenFxTs ?? -99999);
     const isRapidFx = msSinceFx < 420;
     const fxDamp = isRapidFx ? clamp(msSinceFx / 420, 0.44, 0.9) : 1;
     const hitStopDifficultyMul = difficulty <= 1.15 ? 0.82 : difficulty >= 1.65 ? 1.08 : 1;
     const boostedHitStopMs = Math.round(((ult.hitStopMs ?? 120) + 52 + race.intensity * 30) * hitStopDifficultyMul * (isRapidFx ? 0.46 : 1));
 
+    if (ult.trigger === "chain_react") {
+      const cooldownCandidates = (runner.skills ?? []).filter((s) => (runner.cooldownUntil?.[s.id] ?? race.elapsed) > race.elapsed + 0.4);
+      if (cooldownCandidates.length) {
+        const picked = cooldownCandidates[Math.floor(Math.random() * cooldownCandidates.length)];
+        runner.cooldownUntil[picked.id] = Math.max(race.elapsed + 0.35, (runner.cooldownUntil?.[picked.id] ?? race.elapsed) - 2.1);
+        appendSpecialTag(`${picked.kindLabel} 재가속`);
+      } else {
+        appendSpecialTag("연쇄 가속");
+      }
+      specialAnnounceText = specialAnnounceText || "연쇄 공명!";
+    }
+    if (ult.trigger === "first_place_hold" || ult.trigger === "lead_late") {
+      specialDragAura = Math.max(specialDragAura, 0.052);
+      specialDragRange = Math.max(specialDragRange, 11);
+      specialEnemyDrainAura = Math.max(specialEnemyDrainAura, 0.064);
+      appendSpecialTag("선두 압박");
+    }
+    if (ult.trigger === "last_place_hold" || ult.trigger === "bottom2_final") {
+      const leapMeters = clamp(6 + c.gapLeader * 0.22, 6, Math.max(10, race.trackMeters * 0.045));
+      const before = runner.distance;
+      runner.distance = Math.min(race.trackMeters, runner.distance + leapMeters);
+      const moved = Math.max(0, runner.distance - before);
+      runner.stamina = clamp(runner.stamina + 0.035, 0.04, 1);
+      appendSpecialTag(`반격도약 +${moved.toFixed(1)}m`);
+    }
+    if (ult.trigger === "side_by_side" || ult.trigger === "duel_top") {
+      specialDuelRange = Math.max(specialDuelRange, 8.2);
+      specialDuelScale = Math.max(specialDuelScale, 0.11);
+      specialDuelDrain = Math.max(specialDuelDrain, 0.18);
+      appendSpecialTag("난전 우위");
+    }
+    if (ult.trigger === "recover_hold") {
+      specialDebuffResist = Math.min(specialDebuffResist, 0.62);
+      boostedFatigueIgnore += 0.04;
+      specialEnemyRegenCut = Math.max(specialEnemyRegenCut, 0.0014);
+      appendSpecialTag("회복 고정");
+    }
+
     if (ult.specialKind === "dice") {
       const dice = 1 + Math.floor(Math.random() * 6);
-      boostedSpeedMul *= 1 + dice * (ult.diceSpeedPerPip ?? 0.045);
-      boostedFlatSpeed += dice * (ult.diceFlatPerPip ?? 0.45);
-      specialLogText = ` / 주사위 ${dice}`;
-      specialAnnounceText = `주사위 ${dice}!`;
+      const speedPerPip = ult.diceSpeedPerPip ?? 0.042;
+      const flatPerPip = ult.diceFlatPerPip ?? 0.42;
+      boostedSpeedMul *= 1 + dice * speedPerPip;
+      boostedFlatSpeed += dice * flatPerPip;
+      if (dice <= 2) {
+        const failCost = clamp(ult.diceFailStaminaCost ?? 0.09, 0.04, 0.2);
+        runner.stamina = clamp(runner.stamina - failCost, 0.04, 1);
+        boostedSpeedMul *= dice === 1 ? 0.76 : 0.9;
+        boostedFlatSpeed -= dice === 1 ? 2.2 : 0.8;
+        boostedDuration *= dice === 1 ? 0.78 : 0.9;
+        boostedTrail *= 0.86;
+        appendSpecialTag(`주사위 ${dice} (패널티)`);
+        specialAnnounceText = `주사위 ${dice}, 리스크 발생`;
+      } else if (dice === 6) {
+        boostedSpeedMul *= ult.diceJackpotSpeedMul ?? 1.42;
+        boostedFlatSpeed += ult.diceJackpotFlatBonus ?? 4.4;
+        boostedDuration *= 1.15;
+        boostedTrail *= 1.5;
+        boostedFatigueIgnore += 0.18;
+        emitBurstParticles(race, runner, "#fde047", 34, 1.48, "#f97316");
+        appendSpecialTag("주사위 6 (잭팟)");
+        specialAnnounceText = "주사위 6! 잭팟 강화!";
+      } else {
+        appendSpecialTag(`주사위 ${dice}`);
+        specialAnnounceText = `주사위 ${dice}!`;
+      }
     }
     if (ult.specialKind === "all_in") {
       const burstCost = clamp(ult.burstStaminaCost ?? 0.18, 0.08, 0.35);
@@ -1636,7 +1896,7 @@ export default function App() {
       boostedSpeedMul *= 1.12;
       boostedFlatSpeed += 0.9 + burstCost * 4.2;
       boostedFatigueIgnore += 0.06;
-      specialLogText = ` / 올인 -${Math.round(burstCost * 100)}%`;
+      appendSpecialTag(`올인 -${Math.round(burstCost * 100)}%`);
       specialAnnounceText = "올인 폭주!";
     }
     if (ult.specialKind === "blink") {
@@ -1648,17 +1908,76 @@ export default function App() {
         runner.finishedAt = race.elapsed;
       }
       emitBurstParticles(race, runner, ult.color ?? "#a855f7", 26, 1.34);
-      specialLogText = ` / 순간도약 +${moved.toFixed(1)}m`;
+      appendSpecialTag(`순간도약 +${moved.toFixed(1)}m`);
       specialAnnounceText = "순간도약!";
+    }
+    if (ult.specialKind === "meteor") {
+      const jumpSec = clamp(ult.meteorJumpSec ?? 0.8, 0.5, 1.2);
+      const baseLeap = clamp(
+        (ult.meteorLeapMeters ?? 36) + race.trackMeters * (ult.meteorTrackRatio ?? 0),
+        18,
+        Math.max(22, race.trackMeters * 0.2)
+      );
+      const leapMeters = clamp(baseLeap * lerp(2, 3, Math.random()), 42, Math.max(70, race.trackMeters * 0.42));
+      const before = runner.distance;
+      const after = Math.min(race.trackMeters, before + leapMeters);
+      runner.airborneStart = race.elapsed;
+      runner.airborneUntil = race.elapsed + jumpSec;
+      runner.airborneFrom = before;
+      runner.airborneTo = after;
+      runner.airborneApex = clamp(ult.meteorApexPx ?? 64, 32, 120);
+      runner.airborneColor = ult.color ?? "#f97316";
+      runner.airborneTrailAt = race.elapsed;
+      runner.airborneLandPending = true;
+      runner.airborneImpactRange = clamp(ult.meteorImpactRange ?? 12, 6, 20);
+      runner.airborneImpactDrag = clamp(ult.meteorImpactDrag ?? 0.1, 0.03, 0.2);
+      runner.airborneImpactDrain = clamp(ult.meteorImpactDrain ?? 0.1, 0.02, 0.2);
+      const meteorCost = clamp(ult.meteorStaminaCost ?? 0.035, 0.01, 0.12);
+      runner.stamina = clamp(runner.stamina - meteorCost, 0.04, 1);
+      runner.landingFxPower = 1.3;
+      emitBurstParticles(race, runner, "#fb923c", 30, 1.3, "#fde68a");
+      appendSpecialTag(`메테오 점프 +${(after - before).toFixed(1)}m`);
+      specialAnnounceText = "메테오 점프!";
+    }
+    if (ult.specialKind === "leader_snap") {
+      const ahead = race.runners
+        .filter((r) => r.id !== runner.id && (r.finishedAt === null || r.finishedAt === undefined))
+        .sort((a, b) => b.distance - a.distance)[0];
+      if (ahead && ahead.distance > runner.distance + 0.3) {
+        specialLeaderSnap = true;
+        specialNoStaminaCost = true;
+        specialSnapGapMeters = clamp(ult.snapGapMeters ?? 1.4, 0.5, 4.5);
+        specialSnapCatchupMul = clamp(ult.snapCatchupMul ?? 0.95, 0.45, 1.8);
+        specialSnapCatchupFlat = clamp(ult.snapCatchupFlat ?? 2.8, 0.8, 6.8);
+        boostedDuration = clamp(Math.max(boostedDuration, 6.1), 4.8, 9.2);
+        boostedSpeedMul *= 1.08;
+        boostedFlatSpeed += 0.58;
+        boostedTrail *= 1.22;
+        boostedFatigueIgnore += 0.08;
+        emitBurstParticles(race, runner, ult.color ?? "#22d3ee", 26, 1.24, "#e0f2fe");
+        appendSpecialTag("리더 추격 모드");
+        specialAnnounceText = "리더 바로 뒤까지 추격!";
+        race.cameraEventFocusId = runner.id;
+        race.cameraEventKind = "reversal";
+        race.cameraEventUntil = Math.max(race.cameraEventUntil ?? 0, race.elapsed + 1.15);
+      } else {
+        boostedSpeedMul *= 1.08;
+        appendSpecialTag("리더 탐색");
+      }
     }
     if (ult.specialKind === "drain_field") {
       specialDragAura = clamp(ult.specialDragAura ?? 0.1, 0.05, 0.2);
       specialDragRange = clamp(ult.specialDragRange ?? 12, 6, 22);
       specialRegenPerSec = clamp(ult.specialRegenPerSec ?? 0.004, 0.001, 0.012);
       boostedDuration = clamp(boostedDuration * 1.08, 3.6, 8.2);
-      specialLogText = " / 흡수장 전개";
+      appendSpecialTag("흡수장 전개");
       specialAnnounceText = "흡수장 전개!";
     }
+    boostedDuration = clamp(boostedDuration, 2.2, 8.8);
+    boostedSpeedMul = clamp(boostedSpeedMul, 0.62, 3.1);
+    boostedFlatSpeed = clamp(boostedFlatSpeed, -3.2, 9.5);
+    boostedTrail = clamp(boostedTrail, 0.82, 3.1);
+    boostedFatigueIgnore = clamp(boostedFatigueIgnore, -0.08, 0.68);
 
     runner.ultimateUsed = true;
     runner.ultimateActiveUntil = race.elapsed + boostedDuration;
@@ -1675,34 +1994,45 @@ export default function App() {
       race.timeStopUntil = Math.max(race.timeStopUntil ?? 0, race.elapsed + stopSec);
       race.timeStopRunnerId = runner.id;
       race.timeStopColor = ult.color ?? "#60a5fa";
-      specialLogText = ` / 타임스탑 ${stopSec.toFixed(1)}s`;
+      appendSpecialTag(`타임스탑 ${stopSec.toFixed(1)}s`);
       specialAnnounceText = `타임스탑 ${stopSec.toFixed(1)}s`;
     }
 
     runner.activeEffects.push({
       id: `${ult.id}-${race.elapsed.toFixed(3)}`,
       name: `궁극기 ${ult.name}`,
+      effectCode: ultMeta.code,
+      effectLabel: ultMeta.label,
       startsAt: race.elapsed,
       expiresAt: race.elapsed + boostedDuration,
-      noStaminaCost: false,
+      noStaminaCost: specialNoStaminaCost,
       speedMul: boostedSpeedMul,
       flatSpeed: boostedFlatSpeed,
       varianceMul: 1,
       staminaDrainMul: (ult.staminaDrainMul ?? 1) * lerp(1, 1.12, clamp((ultPower - 1.45) / 0.7, 0, 1)),
       staminaRegenPerSec: (ult.staminaRegenPerSec ?? 0) + specialRegenPerSec,
       fatigueIgnore: boostedFatigueIgnore,
-      debuffResist: 0.74,
+      debuffResist: specialDebuffResist,
       dragAura: specialDragAura,
       dragRange: specialDragRange,
+      enemyDrainAura: specialEnemyDrainAura,
+      enemyRegenCut: specialEnemyRegenCut,
       dynamicDraft: false,
       draftMaxGap: 0,
-      duelRange: 0,
-      duelScale: 0,
+      duelRange: specialDuelRange,
+      duelScale: specialDuelScale,
+      duelDrainPerSec: specialDuelDrain,
+      duelFocusBonus: 0,
+      leaderSnapActive: specialLeaderSnap,
+      snapGapMeters: specialSnapGapMeters,
+      snapCatchupMul: specialSnapCatchupMul,
+      snapCatchupFlat: specialSnapCatchupFlat,
+      snapReached: false,
       color: ult.color,
       trailBoost: boostedTrail,
       isUltimate: true
     });
-    runner.lastSkillName = `궁극기 ${ult.name}`;
+    runner.lastSkillName = `[${ultMeta.code}] 궁극기 ${ult.name}`;
     runner.lastSkillUntil = race.elapsed + Math.min(3.3, boostedDuration);
     runner.lastSkillCastAt = race.elapsed;
     playUltimateSfx();
@@ -1712,7 +2042,8 @@ export default function App() {
     const fallbackTag = randomFallback ? " / 중반 랜덤 발동" : "";
     appendRaceLog(
       `${runner.name} 궁극기 ${ult.name} 발동 (x${boostedSpeedMul.toFixed(2)}, +${boostedFlatSpeed.toFixed(1)}m/s, 난도 ${difficulty.toFixed(2)})${specialLogText}${fallbackTag}`,
-      ult.color
+      ult.color,
+      ultMeta.code
     );
     const ultNote = specialAnnounceText || (randomFallback ? "랜덤 궁극기" : ultPower >= 1.9 ? "역전 궁극기" : "궁극기 발동");
     announce(race, `${ultNote}! ${runner.name} - ${ult.name}`, ult.color, 0.95, 1.8);
@@ -1805,6 +2136,10 @@ export default function App() {
         r.speed = 0;
         continue;
       }
+      if ((r.airborneUntil ?? 0) > race.elapsed) {
+        r.speed = Math.max(0, r.speed * 0.68);
+        continue;
+      }
 
       const fieldSize = race.runners.length;
       const sideBySideGap = Math.max(1.35, race.trackMeters * 0.0014);
@@ -1830,8 +2165,15 @@ export default function App() {
     }
 
     const dragMap = new Map(race.runners.map((r) => [r.id, 1]));
+    const enemyDrainMap = new Map(race.runners.map((r) => [r.id, 1]));
+    const enemyRegenCutMap = new Map(race.runners.map((r) => [r.id, 0]));
     for (const src of race.runners) {
-      const aura = src.activeEffects.filter((e) => e.startsAt <= race.elapsed && e.expiresAt > race.elapsed && e.dragAura > 0);
+      const aura = src.activeEffects.filter(
+        (e) =>
+          e.startsAt <= race.elapsed &&
+          e.expiresAt > race.elapsed &&
+          ((e.dragAura ?? 0) > 0 || (e.enemyDrainAura ?? 0) > 0 || (e.enemyRegenCut ?? 0) > 0)
+      );
       if (!aura.length) continue;
       for (const tgt of race.runners) {
         if (tgt.id === src.id || tgt.distance >= src.distance) continue;
@@ -1841,9 +2183,21 @@ export default function App() {
           if (e.startsAt <= race.elapsed && e.expiresAt > race.elapsed && e.debuffResist) resist = Math.min(resist, e.debuffResist);
         }
         for (const a of aura) {
-          if (gap > a.dragRange) continue;
-          const debuff = a.dragAura * (1 - gap / a.dragRange) * resist;
-          dragMap.set(tgt.id, clamp((dragMap.get(tgt.id) ?? 1) * (1 - debuff), 0.8, 1));
+          const auraRange = Math.max(0.0001, a.dragRange ?? 0);
+          if (gap > auraRange) continue;
+          const closeness = 1 - gap / auraRange;
+          if ((a.dragAura ?? 0) > 0) {
+            const speedDebuff = a.dragAura * closeness * resist;
+            dragMap.set(tgt.id, clamp((dragMap.get(tgt.id) ?? 1) * (1 - speedDebuff), 0.8, 1));
+          }
+          if ((a.enemyDrainAura ?? 0) > 0) {
+            const drainDebuff = a.enemyDrainAura * closeness * resist;
+            enemyDrainMap.set(tgt.id, clamp((enemyDrainMap.get(tgt.id) ?? 1) * (1 + drainDebuff), 1, 1.6));
+          }
+          if ((a.enemyRegenCut ?? 0) > 0) {
+            const regenCut = a.enemyRegenCut * closeness * resist;
+            enemyRegenCutMap.set(tgt.id, (enemyRegenCutMap.get(tgt.id) ?? 0) + regenCut);
+          }
         }
       }
     }
@@ -1858,6 +2212,67 @@ export default function App() {
         r.speed = 0;
         continue;
       }
+
+      if ((r.airborneLandPending ?? false) && race.elapsed >= (r.airborneUntil ?? 0)) {
+        r.distance = Math.min(race.trackMeters, Math.max(r.distance, r.airborneTo ?? r.distance));
+        const impactColor = r.airborneColor || r.ultimate?.color || r.color;
+        emitBurstParticles(race, r, impactColor, 30, 1.42, "#fde68a");
+        emitBurstParticles(race, r, "#f8fafc", 12, 1.08, impactColor);
+        r.landingFxUntil = race.elapsed + 0.86;
+        r.landingFxColor = impactColor;
+        r.landingFxPower = Math.max(1, r.landingFxPower ?? 1.1);
+        race.cameraShake = Math.max(race.cameraShake, 2.9 + (r.landingFxPower - 1) * 1.3);
+        race.hitStopUntilTs = Math.max(race.hitStopUntilTs ?? 0, ts + 110);
+        race.ultimateFlashColor = impactColor;
+        appendRaceLog(`${r.name} 메테오 착지 충격파!`, impactColor, "METEOR");
+        if (race.elapsed >= race.nextNoteAllowed) {
+          announce(race, `${r.name} 메테오 착지!`, impactColor, 0.75, 1.35);
+        }
+        if ((r.airborneImpactRange ?? 0) > 0) {
+          r.activeEffects.push({
+            id: `meteor-impact-${r.id}-${race.elapsed.toFixed(3)}`,
+            name: "메테오 충격파",
+            effectCode: "METEOR",
+            effectLabel: "메테오",
+            startsAt: race.elapsed,
+            expiresAt: race.elapsed + 1.2,
+            noStaminaCost: false,
+            speedMul: 1.02,
+            flatSpeed: 0.35,
+            varianceMul: 1,
+            staminaDrainMul: 1.06,
+            staminaRegenPerSec: 0,
+            fatigueIgnore: 0.08,
+            debuffResist: 1,
+            dragAura: r.airborneImpactDrag ?? 0,
+            dragRange: r.airborneImpactRange ?? 0,
+            enemyDrainAura: r.airborneImpactDrain ?? 0,
+            enemyRegenCut: 0.0012,
+            dynamicDraft: false,
+            draftMaxGap: 0,
+            duelRange: 0,
+            duelScale: 0,
+            duelDrainPerSec: 0,
+            duelFocusBonus: 0,
+            color: impactColor
+          });
+        }
+        if ((r.finishedAt === null || r.finishedAt === undefined) && r.distance >= race.trackMeters) {
+          r.finishedAt = race.elapsed + Math.random() * 0.000001;
+        }
+        r.airborneLandPending = false;
+      }
+      if ((r.airborneUntil ?? 0) > race.elapsed) {
+        const jumpDur = Math.max(0.0001, (r.airborneUntil ?? race.elapsed) - (r.airborneStart ?? race.elapsed - 0.001));
+        const jumpT = clamp((race.elapsed - (r.airborneStart ?? race.elapsed)) / jumpDur, 0, 1);
+        r.distance = lerp(r.airborneFrom ?? r.distance, r.airborneTo ?? r.distance, jumpT);
+        r.speed = Math.max(r.speed * 0.4, Math.abs((r.airborneTo ?? r.distance) - (r.airborneFrom ?? r.distance)) / jumpDur);
+        if ((r.airborneTrailAt ?? 0) <= race.elapsed) {
+          emitUltimateTrailParticles(race, r, r.airborneColor || r.ultimate?.color || r.color, 1.18);
+          r.airborneTrailAt = race.elapsed + 0.04 + Math.random() * 0.03;
+        }
+        continue;
+      }
       const active = r.activeEffects.filter((e) => e.startsAt <= race.elapsed && e.expiresAt > race.elapsed);
 
       let speedMul = 1;
@@ -1868,6 +2283,7 @@ export default function App() {
       let fatigueIgnore = 0;
       const comebackActive = r.comebackActiveUntil > race.elapsed;
       let ultimateTrailBoost = 0;
+      let hasNoStaminaCost = false;
       const staminaTier = getStaminaTier(r.stamina);
       const tierSpeedBonus = STAMINA_TIER_SPEED_BONUS[staminaTier];
       let spendDrive = 1;
@@ -1892,9 +2308,17 @@ export default function App() {
       const highStaminaGate = clamp(paceProfile.resumeStamina - (latePhase ? 0.03 : 0), lowStaminaGate + 0.08, 0.95);
       const phaseTargetStamina =
         race.phaseKey === "opening" ? staminaPlan.opening : race.phaseKey === "middle" ? staminaPlan.middle : staminaPlan.final;
-      const staminaGap = phaseTargetStamina - r.stamina;
-      const preserveStrength = clamp(staminaGap / 0.28, 0, 1);
-      const surplusStrength = clamp(-staminaGap / 0.32, 0, 1);
+      let adjustedPhaseTargetStamina = phaseTargetStamina;
+      // Force endgame burn: around 90% progress, runners should have almost spent stamina.
+      if (c.progress >= 0.78) {
+        const burnT = clamp((c.progress - 0.78) / 0.12, 0, 1);
+        const burnTarget = lerp(0.12, 0.03, burnT);
+        adjustedPhaseTargetStamina = Math.min(adjustedPhaseTargetStamina, burnTarget);
+      }
+      const staminaGap = adjustedPhaseTargetStamina - r.stamina;
+      let preserveStrength = clamp(staminaGap / 0.28, 0, 1);
+      let surplusStrength = clamp(-staminaGap / 0.32, 0, 1);
+      const finalRushT = clamp((c.progress - 0.9) / 0.1, 0, 1);
 
       const rollRunWindow = () => {
         let d = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.56);
@@ -1928,6 +2352,13 @@ export default function App() {
           r.paceModeUntil = race.elapsed + rollRunWindow();
           r.paceLockedUntil = race.elapsed + PACE_MIN_RUN_HOLD_SEC;
         }
+      }
+
+      // Near finish, prefer all-out running over recovery.
+      if (finalRushT > 0 && r.paceMode !== "run") {
+        r.paceMode = "run";
+        r.paceModeUntil = race.elapsed + Math.max(1.2, rollRunWindow() * (1.1 + finalRushT * 0.35));
+        r.paceLockedUntil = race.elapsed + PACE_MIN_RUN_HOLD_SEC;
       }
 
       let runSpeedMul = paceProfile.runSpeedMul;
@@ -1974,24 +2405,24 @@ export default function App() {
       }
 
       if (r.traitId === "steady") {
-        speedMul *= 1.01;
+        speedMul *= 1.0293;
         varMul *= 0.84;
         drainMul *= 0.92;
         spendDrive *= 0.86;
       }
       if (r.traitId === "mid_spender") {
         if (c.progress < 0.32) {
-          speedMul *= 0.97;
+          speedMul *= 0.9297;
           drainMul *= 0.46;
           spendDrive *= 0.55;
           regen += 0.0012;
         } else if (c.progress <= 0.72) {
-          speedMul *= 1.17;
+          speedMul *= 1.1213;
           flat += 0.75;
           drainMul *= 1.62;
           spendDrive *= 1.46;
         } else {
-          speedMul *= 0.965;
+          speedMul *= 0.9249;
           drainMul *= 1.08;
         }
       }
@@ -1999,13 +2430,13 @@ export default function App() {
         if (c.progress < 0.62) {
           const frontPackCutoff = Math.max(2, Math.ceil(fieldSize * 0.35));
           const isFrontPack = c.rank <= frontPackCutoff;
-          speedMul *= isFrontPack ? 0.82 : 0.9;
+          speedMul *= isFrontPack ? 0.8147 : 0.8942;
           flat += isFrontPack ? -0.55 : -0.2;
           drainMul *= isFrontPack ? 1.06 : 0.92;
           spendDrive *= isFrontPack ? 0.68 : 0.78;
-          if (race.phaseKey === "opening") speedMul *= 0.92;
+          if (race.phaseKey === "opening") speedMul *= 0.9141;
         } else {
-          speedMul *= 1.24;
+          speedMul *= 1.232;
           flat += 0.52;
           drainMul *= 1.28;
           spendDrive *= 1.3;
@@ -2013,52 +2444,70 @@ export default function App() {
       }
       if (r.traitId === "front_runner") {
         if (c.progress < 0.36) {
-          speedMul *= 1.26;
-          flat += 1.05;
-          drainMul *= 1.36;
-          spendDrive *= 1.35;
+          const launchMul = c.progress < 0.12 ? 1.48 : c.progress < 0.24 ? 1.34 : 1.22;
+          const launchFlat = c.progress < 0.12 ? 2.05 : c.progress < 0.24 ? 1.45 : 1;
+          speedMul *= launchMul;
+          flat += launchFlat;
+          drainMul *= c.progress < 0.12 ? 1.28 : 1.2;
+          spendDrive *= c.progress < 0.12 ? 1.33 : 1.18;
+          fatigueIgnore += c.progress < 0.24 ? 0.045 : 0.02;
           if (race.phaseKey === "opening" && c.progress < 0.2) {
-            speedMul *= 1.05;
-            flat += 0.25;
+            speedMul *= 1.045;
+            flat += 0.42;
           }
         } else if (c.progress > 0.7) {
-          speedMul *= 0.94;
+          speedMul *= 0.9004;
+        }
+        // If lead is secured, front runners stabilize pace to avoid burning out too early.
+        if (c.rank === 1 && c.progress >= 0.18 && c.progress < 0.62) {
+          const gapBehind = c.gapBehind < Infinity ? c.gapBehind : 0;
+          const safeLead = clamp(
+            (gapBehind - Math.max(2.2, race.trackMeters * 0.002)) / Math.max(8.5, race.trackMeters * 0.012),
+            0,
+            1
+          );
+          if (safeLead > 0) {
+            speedMul *= 1 - safeLead * 0.03;
+            drainMul *= 1 - safeLead * 0.24;
+            spendDrive *= 1 - safeLead * 0.18;
+            regen += safeLead * 0.001;
+          }
         }
       }
       if (r.traitId === "closer") {
         const catchMul = 1 + clamp(c.gapLeader / Math.max(18, race.trackMeters * 0.04), 0, 0.24);
-        speedMul *= catchMul;
+        speedMul *= catchMul * 0.936507;
         spendDrive *= 1.1;
       }
       if (r.traitId === "endurance") {
-        speedMul *= 0.952;
+        speedMul *= 0.9565;
         drainMul *= 1.01;
         regen += 0.00012;
         fatigueIgnore += 0.008;
         spendDrive *= 0.98;
         if (race.phaseKey === "final" || race.phaseKey === "climax") {
-          speedMul *= 0.97;
+          speedMul *= 0.9746;
           spendDrive *= 0.95;
           drainMul *= 1.04;
         }
       }
       if (r.traitId === "sprinter") {
         if (race.phaseKey === "final" || race.phaseKey === "climax") {
-          speedMul *= 1.2;
+          speedMul *= 1.2083;
           flat += 0.75;
           drainMul *= 1.35;
           spendDrive *= 1.38;
         } else {
-          speedMul *= 0.955;
+          speedMul *= 0.9616;
         }
       }
       if (r.traitId === "risk_taker") {
-        speedMul *= lerp(0.9, 1.22, Math.random());
+        speedMul *= lerp(0.863, 1.1699, Math.random());
         varMul *= 1.18;
         spendDrive *= 1.28;
       }
       if (r.traitId === "tactician") {
-        speedMul *= 1.02;
+        speedMul *= 0.9845;
         varMul *= 0.92;
         drainMul *= 0.95;
         spendDrive *= 0.94;
@@ -2068,23 +2517,34 @@ export default function App() {
         const isBottom = c.rank >= Math.max(2, fieldSize - 1);
         const isFrontPack = c.rank <= Math.max(1, Math.floor(fieldSize * 0.4));
         if (isLast) {
-          speedMul *= 1.24;
+          speedMul *= 1.364;
           flat += 0.88;
           drainMul *= 1.3;
           spendDrive *= 1.48;
           regen += 0.0006;
         } else if (isBottom) {
-          speedMul *= 1.12;
+          speedMul *= 1.232;
           flat += 0.42;
           drainMul *= 1.18;
           spendDrive *= 1.24;
         } else if (isFrontPack) {
-          speedMul *= 0.9;
+          speedMul *= 0.99;
           drainMul *= 0.9;
           spendDrive *= 0.86;
         } else {
-          speedMul *= 0.97;
+          speedMul *= 1.067;
         }
+      }
+
+      if (finalRushT > 0) {
+        // Convert remaining stamina into final acceleration instead of preserving it.
+        const staminaBurst = clamp((r.stamina - 0.07) / 0.28, 0, 1);
+        preserveStrength *= 1 - finalRushT;
+        surplusStrength = Math.max(surplusStrength, staminaBurst * finalRushT);
+        speedMul *= 1 + finalRushT * 0.1 + staminaBurst * finalRushT * 0.12;
+        drainMul *= 1 + finalRushT * 0.72;
+        spendDrive *= 1 + finalRushT * 0.88;
+        fatigueIgnore += finalRushT * 0.08;
       }
 
       if (preserveStrength > 0) {
@@ -2099,15 +2559,86 @@ export default function App() {
         spendDrive *= 1 + surplusStrength * 0.2 * phaseSpendMul;
       }
 
+      // Extra drain near finish so stamina is mostly exhausted by ~90% progress.
+      if (c.progress >= 0.82) {
+        const burnT = clamp((c.progress - 0.82) / 0.08, 0, 1);
+        const excessStamina = clamp((r.stamina - 0.04) / 0.26, 0, 1);
+        const burnStrength = burnT * excessStamina;
+        if (burnStrength > 0) {
+          speedMul *= 1 + burnStrength * 0.05;
+          drainMul *= 1 + burnStrength * 0.62;
+          spendDrive *= 1 + burnStrength * 0.72;
+          regen -= burnStrength * 0.0012;
+        }
+      }
+
       for (const e of active) {
         if (e.isUltimate) ultimateTrailBoost = Math.max(ultimateTrailBoost, e.trailBoost ?? 1.2);
+        if (e.noStaminaCost && !(e.leaderSnapActive && c.rank === 1)) hasNoStaminaCost = true;
         if (e.dynamicDraft) {
           if (c.gapAhead < Infinity && c.gapAhead <= e.draftMaxGap) {
             const closeness = 1 - clamp((c.gapAhead - 0.5) / Math.max(0.5, e.draftMaxGap - 0.5), 0, 1);
             speedMul *= 1 + (e.speedMul - 1) * closeness;
           } else speedMul *= 1.01;
         } else speedMul *= e.speedMul;
-        if (e.duelRange > 0 && c.closeGap <= e.duelRange) speedMul *= 1 + e.duelScale * (1 - c.closeGap / e.duelRange);
+        if (e.leaderSnapActive) {
+          if (c.rank === 1) {
+            if (!e.snapReached) {
+              e.snapReached = true;
+              appendRaceLog(`${r.name} 리더 섀도우 종료 (1위 도달)`, e.color ?? r.color, "SNAP");
+              if (race.elapsed >= race.nextNoteAllowed) {
+                announce(race, `${r.name} 1위 도달!`, e.color ?? r.color, 0.72, 1.1);
+              }
+            }
+            e.expiresAt = Math.min(e.expiresAt, race.elapsed + 0.05);
+            continue;
+          }
+          const ahead = race.runners
+            .filter((t) => t.id !== r.id && (t.finishedAt === null || t.finishedAt === undefined) && t.distance > r.distance)
+            .sort((a, b) => b.distance - a.distance)[0];
+          if (ahead) {
+            const snapGap = Math.max(0.1, e.snapGapMeters ?? 1.4);
+            const gap = ahead.distance - r.distance;
+            if (gap > snapGap) {
+              const chaseNorm = clamp((gap - snapGap) / Math.max(10, race.trackMeters * 0.026), 0, 1.9);
+              const catchMul = (e.snapCatchupMul ?? 0.95) * (0.48 + chaseNorm * 0.86);
+              const catchFlat = (e.snapCatchupFlat ?? 2.8) * (0.5 + chaseNorm * 0.82);
+              speedMul *= 1 + catchMul;
+              flat += catchFlat;
+              fatigueIgnore += 0.1 + chaseNorm * 0.08;
+              if (race.cameraEventFocusId !== r.id || (race.cameraEventUntil ?? 0) < race.elapsed + 0.4) {
+                race.cameraEventFocusId = r.id;
+                race.cameraEventKind = "reversal";
+                race.cameraEventUntil = Math.max(race.cameraEventUntil ?? 0, race.elapsed + 0.75);
+              }
+            } else if (!e.snapReached) {
+              e.snapReached = true;
+              e.expiresAt = Math.min(e.expiresAt, race.elapsed + 0.36);
+              appendRaceLog(`${r.name} 리더 바로 뒤 포착!`, e.color ?? r.color, "SNAP");
+              if (race.elapsed >= race.nextNoteAllowed) {
+                announce(race, `${r.name} 리더 바로 뒤 접근!`, e.color ?? r.color, 0.72, 1.1);
+              }
+            }
+          } else {
+            if (!e.snapReached) {
+              e.snapReached = true;
+              appendRaceLog(`${r.name} 리더 섀도우 종료`, e.color ?? r.color, "SNAP");
+            }
+            e.expiresAt = Math.min(e.expiresAt, race.elapsed + 0.05);
+          }
+        }
+        if (e.duelRange > 0 && c.closeGap <= e.duelRange) {
+          const duelCloseness = 1 - c.closeGap / e.duelRange;
+          speedMul *= 1 + (e.duelScale ?? 0) * duelCloseness;
+          if ((e.duelDrainPerSec ?? 0) > 0) {
+            const duelDrainBoost = e.duelDrainPerSec * duelCloseness;
+            drainMul *= 1 + duelDrainBoost;
+            spendDrive *= 1 + duelDrainBoost * 0.62;
+          }
+          if ((e.duelFocusBonus ?? 0) > 0) {
+            fatigueIgnore += e.duelFocusBonus * duelCloseness;
+          }
+        }
         flat += e.flatSpeed;
         varMul *= e.varianceMul;
         drainMul *= e.staminaDrainMul;
@@ -2116,6 +2647,8 @@ export default function App() {
       }
 
       speedMul *= dragMap.get(r.id) ?? 1;
+      drainMul *= enemyDrainMap.get(r.id) ?? 1;
+      regen -= enemyRegenCutMap.get(r.id) ?? 0;
       if (comebackActive) {
         const remainRatio = clamp((r.comebackActiveUntil - race.elapsed) / 4, 0, 1);
         speedMul *= 1.1 + remainRatio * 0.22;
@@ -2209,6 +2742,7 @@ export default function App() {
       if (race.phaseKey === "opening") recover += dt * 0.0014;
       if (race.phaseKey === "climax") drain *= 1.14;
       drain *= clamp(0.86 + spendDrive * 0.34, 0.72, 1.42);
+      if (hasNoStaminaCost) drain = 0;
       r.stamina = clamp(r.stamina - drain + recover, 0.04, 1);
     }
 
@@ -2232,10 +2766,33 @@ export default function App() {
     const rankMap = new Map(sorted.map((r, i) => [r.id, i + 1]));
     const overtaker = sorted.slice(0, 4).find((r) => (race.prevRanks.get(r.id) ?? 99) > (rankMap.get(r.id) ?? 99));
     if (overtaker && race.elapsed >= race.nextNoteAllowed) announce(race, `${overtaker.name} 추월!`, "#22c55e", 0.68, 1.2);
+    if (overtaker && (overtaker.finishedAt === null || overtaker.finishedAt === undefined)) {
+      const prevRank = race.prevRanks.get(overtaker.id) ?? 99;
+      const nowRank = rankMap.get(overtaker.id) ?? 99;
+      const rankGain = Math.max(1, prevRank - nowRank);
+      let eventDur = clamp(0.68 + rankGain * 0.24 + (race.phaseKey === "climax" ? 0.18 : 0), 0.72, 1.5);
+      if (nowRank === 1) eventDur = Math.min(1.66, eventDur + 0.22);
+      race.cameraEventFocusId = overtaker.id;
+      race.cameraEventKind = nowRank === 1 ? "reversal" : "overtake";
+      race.cameraEventUntil = Math.max(race.cameraEventUntil ?? 0, race.elapsed + eventDur);
+    }
     if (race.phaseKey === "climax" && sorted.length > 1) {
       const duelGap = sorted[0].distance - sorted[1].distance;
       if (duelGap <= Math.max(2.2, race.trackMeters * 0.0022) && race.elapsed >= race.nextNoteAllowed) {
         announce(race, "포토피니시 접전!", "#fb7185", 0.85, 1);
+      }
+    }
+    const livePair = sorted.filter((r) => r.finishedAt === null || r.finishedAt === undefined).slice(0, 2);
+    if (livePair.length === 2) {
+      const leadR = livePair[0];
+      const chaseR = livePair[1];
+      const duelGap = leadR.distance - chaseR.distance;
+      const speedEdge = chaseR.speed - leadR.speed;
+      const duelGapMax = Math.max(4.4, race.trackMeters * 0.0044);
+      if (duelGap <= duelGapMax && speedEdge > 0.72) {
+        race.cameraEventFocusId = chaseR.id;
+        race.cameraEventKind = "reversal";
+        race.cameraEventUntil = Math.max(race.cameraEventUntil ?? 0, race.elapsed + 0.86);
       }
     }
     race.prevRanks = rankMap;
@@ -2278,14 +2835,110 @@ export default function App() {
 
     const cw = Math.max(320, canvasSizeRef.current.width || 960);
     const leadX = anchorDistance * race.meterToPixel;
-    const focusRunner = race.runners.find((r) => r.id === race.ultimateFocusId && (r.finishedAt === null || r.finishedAt === undefined));
-    const focusX = (focusRunner?.distance ?? paceLeader.distance) * race.meterToPixel;
-    const cameraAnchorX = lerp(leadX, focusX, ultFocusWeight * 0.68);
-    const zoomTarget = clamp(1 + race.intensity * 0.11 + (race.phaseKey === "climax" ? 0.05 : 0) + ultFocusWeight * 0.06 - packStability * 0.03, 1, 1.32);
-    race.cameraZoom += (zoomTarget - race.cameraZoom) * 0.1;
+    const leaderProgress = paceLeader.distance / race.trackMeters;
+    const lateLeaderLock = leaderProgress >= 0.85;
+    const cameraTargets = activeSorted.length ? activeSorted : sorted;
+    const currentFocusRunner = cameraTargets.find((r) => r.id === race.cameraFocusId);
+    const eventActive = !lateLeaderLock && race.elapsed < (race.cameraEventUntil ?? 0);
+    const eventFocusRunner =
+      eventActive && race.cameraEventFocusId
+        ? cameraTargets.find((r) => r.id === race.cameraEventFocusId && (r.finishedAt === null || r.finishedAt === undefined))
+        : null;
+    const canKeepFocus = !eventFocusRunner && !lateLeaderLock && currentFocusRunner && race.elapsed < (race.cameraFocusLockUntil ?? 0);
+    let focusReason = "leader";
+
+    if (lateLeaderLock) {
+      race.cameraFocusId = paceLeader.id;
+      race.cameraFocusLockUntil = race.elapsed + 0.45;
+      race.cameraEventFocusId = "";
+      race.cameraEventKind = "";
+      race.cameraEventUntil = 0;
+      focusReason = "leader_lock";
+    } else if (!canKeepFocus) {
+      let candidate = null;
+      if (eventFocusRunner) {
+        candidate = eventFocusRunner;
+        focusReason = race.cameraEventKind === "reversal" ? "reversal" : "overtake";
+      } else {
+        const activeUltRunner = cameraTargets
+          .filter((r) => r.id !== paceLeader.id && r.ultimateActiveUntil > race.elapsed)
+          .sort((a, b) => b.ultimateActiveUntil - a.ultimateActiveUntil)[0];
+
+        if (activeUltRunner) {
+          candidate = activeUltRunner;
+          focusReason = "ultimate";
+        } else if (surge && surge.id !== paceLeader.id) {
+          candidate = surge;
+          focusReason = "surge";
+        } else {
+          const gapLimit = Math.max(18, race.trackMeters * 0.045);
+          const chaseCandidate = cameraTargets
+            .filter((r) => r.id !== paceLeader.id)
+            .map((r) => {
+              const gap = paceLeader.distance - r.distance;
+              const closeness = 1 - clamp(gap / gapLimit, 0, 1);
+              const speedEdge = clamp((r.speed - paceLeader.speed) / 10, -0.6, 0.8);
+              const comebackScore = r.comebackActiveUntil > race.elapsed ? 0.26 : 0;
+              const meteorScore = (r.airborneUntil ?? 0) > race.elapsed ? 0.22 : 0;
+              const score = closeness * 0.52 + speedEdge * 0.34 + comebackScore + meteorScore;
+              return { r, score, gap };
+            })
+            .filter((row) => row.gap <= gapLimit)
+            .sort((a, b) => b.score - a.score)[0];
+
+          if (chaseCandidate && chaseCandidate.score > 0.28) {
+            candidate = chaseCandidate.r;
+            focusReason = candidate.comebackActiveUntil > race.elapsed ? "comeback" : "chase";
+          }
+        }
+      }
+
+      if (candidate) {
+        const lockDur =
+          focusReason === "overtake" || focusReason === "reversal"
+            ? 0.9
+            : candidate.ultimateActiveUntil > race.elapsed
+              ? 1.4
+              : 1.05;
+        if (candidate.id !== race.cameraFocusId || race.cameraFocusLockUntil < race.elapsed + lockDur * 0.45) {
+          race.cameraFocusId = candidate.id;
+          race.cameraFocusLockUntil = race.elapsed + lockDur;
+        }
+      } else if (!candidate) {
+        race.cameraFocusId = "";
+        race.cameraFocusLockUntil = race.elapsed + 0.32;
+      }
+    }
+
+    const focusRunner = cameraTargets.find((r) => r.id === race.cameraFocusId) ?? paceLeader;
+    const focusX = focusRunner.distance * race.meterToPixel;
+    const focusGap = Math.max(0, paceLeader.distance - focusRunner.distance);
+    const focusGapNorm = 1 - clamp(focusGap / Math.max(18, race.trackMeters * 0.035), 0, 1);
+    let cameraFocusWeight = 0;
+    if (!lateLeaderLock && focusRunner.id !== paceLeader.id) {
+      cameraFocusWeight = 0.44 + focusGapNorm * 0.18;
+      if (focusReason === "ultimate") cameraFocusWeight += 0.16;
+      if (focusReason === "surge" || focusReason === "chase" || focusReason === "comeback") cameraFocusWeight += 0.08;
+      if (focusReason === "overtake") cameraFocusWeight += 0.14;
+      if (focusReason === "reversal") cameraFocusWeight += 0.18;
+      if ((focusRunner.airborneUntil ?? 0) > race.elapsed) cameraFocusWeight += 0.08;
+      cameraFocusWeight += ultFocusWeight * 0.18;
+    }
+    cameraFocusWeight = clamp(cameraFocusWeight, 0, 0.78);
+
+    const cameraAnchorX = lerp(leadX, focusX, cameraFocusWeight);
+    const zoomTarget = clamp(
+      1 + race.intensity * (lateLeaderLock ? 0.08 : 0.11) + (race.phaseKey === "climax" ? 0.04 : 0) + cameraFocusWeight * 0.04 - packStability * 0.03,
+      1,
+      lateLeaderLock ? 1.28 : 1.34
+    );
+    race.cameraZoom += (zoomTarget - race.cameraZoom) * (lateLeaderLock ? 0.08 : 0.1);
     const vw = cw / race.cameraZoom;
     const targetCam = clamp(cameraAnchorX - vw * (0.42 - race.intensity * 0.05), 0, Math.max(0, race.trackPixels - vw));
-    race.cameraX += (targetCam - race.cameraX) * clamp(0.07 + race.feelBoost * 0.025 - packStability * 0.02, 0.055, 0.14);
+    const camLerp = clamp(0.06 + race.feelBoost * 0.023 - packStability * 0.02, 0.05, lateLeaderLock ? 0.115 : 0.13);
+    const rawCamDelta = (targetCam - race.cameraX) * camLerp;
+    const maxCamStep = Math.max(18, vw * dt * 2.9);
+    race.cameraX += clamp(rawCamDelta, -maxCamStep, maxCamStep);
 
     const allFinished = race.runners.length > 0 && race.runners.every((r) => r.finishedAt !== null && r.finishedAt !== undefined);
     if (allFinished) {
@@ -2457,7 +3110,15 @@ export default function App() {
       const finishVisual = getFinishedVisual(race.elapsed, r);
       if (!finishVisual.visible) continue;
       const x = (r.distance + finishVisual.extraMeters) * race.meterToPixel;
-      const y = clamp(top + h * 0.52 + r.laneOffset, top + 18, bottom - 18);
+      const groundY = clamp(top + h * 0.52 + r.laneOffset, top + 18, bottom - 18);
+      const airborneActive = (r.airborneUntil ?? 0) > race.elapsed;
+      let jumpLift = 0;
+      if (airborneActive) {
+        const jumpDur = Math.max(0.0001, (r.airborneUntil ?? race.elapsed) - (r.airborneStart ?? race.elapsed - 0.001));
+        const jumpT = clamp((race.elapsed - (r.airborneStart ?? race.elapsed)) / jumpDur, 0, 1);
+        jumpLift = Math.sin(Math.PI * jumpT) * (r.airborneApex ?? 54);
+      }
+      const y = groundY - jumpLift;
       const active = r.activeEffects.filter((e) => e.startsAt <= race.elapsed && e.expiresAt > race.elapsed);
       const head = active[active.length - 1];
       const isComeback = r.comebackActiveUntil > race.elapsed;
@@ -2479,8 +3140,43 @@ export default function App() {
 
       ctx.fillStyle = "rgba(15,23,42,0.35)";
       ctx.beginPath();
-      ctx.ellipse(x, y + 11, 14, 5, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, groundY + 11, 14 + jumpLift * 0.02, 5 + jumpLift * 0.015, 0, 0, Math.PI * 2);
       ctx.fill();
+
+      const landingFxRemain = (r.landingFxUntil ?? 0) - race.elapsed;
+      if (landingFxRemain > 0) {
+        const life = clamp(landingFxRemain / 0.86, 0, 1);
+        const t = 1 - life;
+        const power = r.landingFxPower ?? 1;
+        const ringRadius = (16 + t * 52) * power;
+        ctx.globalAlpha = (0.34 + life * 0.28) * finishVisual.fade;
+        ctx.strokeStyle = r.landingFxColor || "#fb923c";
+        ctx.lineWidth = 4.2 - t * 2;
+        ctx.beginPath();
+        ctx.arc(x, groundY + 2, ringRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = (0.22 + life * 0.18) * finishVisual.fade;
+        ctx.strokeStyle = "#f8fafc";
+        ctx.lineWidth = 2.4 - t;
+        ctx.beginPath();
+        ctx.arc(x, groundY + 2, ringRadius * 0.72, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      if (airborneActive) {
+        const fromX = (r.airborneFrom ?? r.distance) * race.meterToPixel;
+        const toX = (r.airborneTo ?? r.distance) * race.meterToPixel;
+        const apexY = groundY - (r.airborneApex ?? 54) * 1.08;
+        ctx.globalAlpha = 0.44;
+        ctx.strokeStyle = r.airborneColor || r.ultimate?.color || "#fb923c";
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(fromX, groundY);
+        ctx.quadraticCurveTo((fromX + toX) * 0.5, apexY, toX, groundY);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
 
       if (head) {
         ctx.strokeStyle = `${head.color}${r.id === race.surgeId ? "ff" : "cc"}`;
@@ -2737,6 +3433,11 @@ export default function App() {
       timeStopUntil: 0,
       timeStopRunnerId: "",
       timeStopColor: "#60a5fa",
+      cameraFocusId: "",
+      cameraFocusLockUntil: 0,
+      cameraEventFocusId: "",
+      cameraEventUntil: 0,
+      cameraEventKind: "",
       runners,
       particles: [],
       prevRanks: new Map(runners.map((r, i) => [r.id, i + 1])),
@@ -2947,6 +3648,13 @@ export default function App() {
                   {[...raceLogs].reverse().map((log) => (
                     <div className="log-item" key={log.id}>
                       <span className="log-time">{log.time}</span>
+                      {log.badge ? (
+                        <span className="log-badge" style={{ borderColor: `${log.color}66`, color: log.color }}>
+                          {log.badge}
+                        </span>
+                      ) : (
+                        <span className="log-badge log-badge-empty" />
+                      )}
                       <span className="log-text" style={{ color: log.color }}>
                         {log.text}
                       </span>

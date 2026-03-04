@@ -457,7 +457,7 @@ button:disabled {
 
 .log-item {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto auto 1fr;
   gap: 8px;
   align-items: center;
   background: #ffffff;
@@ -470,6 +470,23 @@ button:disabled {
   font-size: 11px;
   color: #64748b;
   font-weight: 700;
+}
+
+.log-badge {
+  min-width: 44px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 2px 6px;
+  line-height: 1.1;
+  background: #f8fafc;
+}
+
+.log-badge-empty {
+  opacity: 0;
 }
 
 .log-text {
