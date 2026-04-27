@@ -3533,14 +3533,35 @@ export default function App() {
     progress: clamp(c.distance / raceTrackMeters, 0, 1)
   }));
   const leaderMiniProgress = minimapRunners[0]?.progress ?? 0;
+  const setupPreviewNames = parseRunnerNames(nameInput);
+  const setupTrackPreview = clamp(Number(trackInput) || Number(raceRef.current.trackMeters) || 1200, MIN_TRACK, MAX_TRACK);
 
   return (
     <main className={`page ${viewMode === "race" ? "page-race" : "page-setup"}`}>
       {viewMode === "setup" ? (
-        <>
-          <section className="panel setup-panel">
-            <h1>캔버스 달리기</h1>
-            <div className="controls">
+        <section className="setup-shell">
+          <div className="setup-hero">
+            <div className="setup-kicker">Race Setup</div>
+            <div className="setup-title-row">
+              <h1>캔버스 달리기</h1>
+              <span>{APP_VERSION}</span>
+            </div>
+            <div className="setup-stats" aria-label="레이스 설정 요약">
+              <div>
+                <span>ENTRY</span>
+                <strong>{setupPreviewNames.length || 0}</strong>
+              </div>
+              <div>
+                <span>TRACK</span>
+                <strong>{setupTrackPreview}m</strong>
+              </div>
+              <div>
+                <span>SKILL</span>
+                <strong>{skillsEnabled ? "ON" : "OFF"}</strong>
+              </div>
+            </div>
+
+            <div className="controls launch-controls">
               <label>
                 참가자 이름 (`,`로 구분)
                 <input type="text" value={nameInput} onChange={(e) => setNameInput(e.target.value)} placeholder="예: 토끼,거북이,치타" />
@@ -3549,9 +3570,9 @@ export default function App() {
                 코스 길이 (1~10000m)
                 <input type="number" min={MIN_TRACK} max={MAX_TRACK} step={1} value={trackInput} onChange={(e) => setTrackInput(e.target.value)} />
               </label>
-              <div className="buttons">
-                <button onClick={deployLineup}>배치</button>
-                <button onClick={startRace} className="ghost" disabled={!deployedRunners.length}>
+              <div className="buttons launch-buttons">
+                <button onClick={deployLineup}>출전 배치</button>
+                <button onClick={startRace} className="start-button" disabled={!deployedRunners.length}>
                   레이스 시작
                 </button>
                 <label className="skill-toggle">
@@ -3560,16 +3581,36 @@ export default function App() {
                 </label>
               </div>
             </div>
-            <p className="meta">스킬 풀: {skillPool.length}종 / 타입: {TOTAL_SKILL_TYPE_COUNT}종 / 궁극기: {ULTIMATE_POOL.length}종</p>
-            <p className="meta">밸런스 룰: 회복 스킬은 참가자당 최대 1개로 제한됩니다.</p>
-            <p className="meta">배치를 누를 때마다 각 폰의 성향/스킬/궁극기가 랜덤으로 다시 배정됩니다.</p>
             {error && <p className="error">{error}</p>}
-          </section>
+          </div>
 
-          <section className="panel deploy-panel">
-            <h2>배치 결과</h2>
+          <aside className="setup-dock">
+            <div className="dock-head">
+              <div>
+                <span>ENTRY SHEET</span>
+                <h2>{deployedRunners.length ? "출전표" : "대기표"}</h2>
+              </div>
+              <strong>{deployedRunners.length || setupPreviewNames.length}명</strong>
+            </div>
+
+            <div className="race-rules">
+              <span>스킬 {skillPool.length}종</span>
+              <span>타입 {TOTAL_SKILL_TYPE_COUNT}종</span>
+              <span>궁극기 {ULTIMATE_POOL.length}종</span>
+              <span>회복 스킬 최대 1개</span>
+            </div>
+
             {!deployedRunners.length ? (
-              <p className="meta">먼저 배치를 눌러 참가자 구성을 생성하세요.</p>
+              <div className="empty-lineup">
+                <p>참가자 이름과 코스 길이를 정한 뒤 `출전 배치`를 누르세요.</p>
+                <div className="preview-names">
+                  {(setupPreviewNames.length ? setupPreviewNames : ["토끼", "거북이", "치타", "늑대"]).slice(0, 8).map((name, i) => (
+                    <span key={`${name}-${i}`} style={{ borderColor: colorForIndex(i, Math.max(setupPreviewNames.length, 4)) }}>
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="deploy-grid">
                 {deployedRunners.map((r) => (
@@ -3591,8 +3632,8 @@ export default function App() {
                 ))}
               </div>
             )}
-          </section>
-        </>
+          </aside>
+        </section>
       ) : (
         <>
           <section className="race-screen">
