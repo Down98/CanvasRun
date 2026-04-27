@@ -2,6 +2,7 @@
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getTraitRaceIntent } from "./src/game/traitBehavior.js";
 
 const DEFAULT_RUNS = 1000;
 const DEFAULT_TRACK = 1200;
@@ -356,6 +357,7 @@ function createRunner(name, idx, rng, forcedTrait = null, traits = TRAITS) {
     id: idx + 1,
     name,
     trait,
+    baseSpeed: 10.35 + rng() * 1.55,
     distance: 0,
     stamina: 1,
     finishTime: null,
@@ -395,6 +397,10 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       const phaseKey = phaseKeyFromProgress(progress);
       const leader = sorted[0];
       const gapLeader = leader ? Math.max(0, leader.distance - r.distance) : 0;
+      const ahead = rank > 1 ? sorted[rank - 2] : null;
+      const behind = rank < sorted.length ? sorted[rank] : null;
+      const gapAhead = ahead ? Math.max(0, ahead.distance - r.distance) : Infinity;
+      const gapBehind = behind ? Math.max(0, r.distance - behind.distance) : Infinity;
       const fieldSize = runners.length;
 
       let speedMul = 1;
@@ -416,12 +422,24 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       const preserveStrength = clamp(staminaGap / 0.28, 0, 1);
       const surplusStrength = clamp(-staminaGap / 0.32, 0, 1);
       const canSwitchPaceMode = time >= r.paceLockedUntil;
+      const traitIntent = getTraitRaceIntent({
+        traitId: r.trait.id,
+        progress,
+        rank,
+        fieldSize,
+        gapLeader,
+        gapAhead,
+        gapBehind,
+        stamina: r.stamina,
+        phaseKey
+      });
 
       const rollRunWindow = () => {
         let d = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.56, rng);
         if (progress < 0.24) d *= paceProfile.earlyRunBias;
         if (progress > 0.72) d *= paceProfile.lateRunBias;
         if (desperateChase) d *= 1.22;
+        d *= traitIntent.runWindowMul;
         return clamp(d, 0.8, 8.2);
       };
 
@@ -429,10 +447,24 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
         let d = rollPaceDuration(paceProfile.recoverMinSec, paceProfile.recoverMaxSec, forceRecover ? 0.72 : 0.48, rng);
         if (progress > 0.78) d *= 0.88;
         if (desperateChase) d *= 0.7;
+        d *= traitIntent.recoverWindowMul;
         return clamp(d, 0.45, 5.3);
       };
 
-      if (r.paceMode === "run") {
+      let traitForcedSwitch = false;
+      if (traitIntent.forceRun && r.paceMode !== "run" && canSwitchPaceMode && r.stamina > 0.06) {
+        r.paceMode = "run";
+        r.paceModeUntil = time + rollRunWindow();
+        r.paceLockedUntil = time + PACE_MIN_RUN_HOLD_SEC;
+        traitForcedSwitch = true;
+      } else if (traitIntent.forceRecover && r.paceMode !== "recover" && canSwitchPaceMode && r.stamina < 0.86 && progress < 0.9) {
+        r.paceMode = "recover";
+        r.paceModeUntil = time + rollRecoverWindow(true);
+        r.paceLockedUntil = time + PACE_MIN_RECOVER_HOLD_SEC;
+        traitForcedSwitch = true;
+      }
+
+      if (!traitForcedSwitch && r.paceMode === "run") {
         const timedOut = time >= r.paceModeUntil;
         const forced = r.stamina <= lowStaminaGate;
         if ((forced || timedOut) && canSwitchPaceMode) {
@@ -440,7 +472,7 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
           r.paceModeUntil = time + rollRecoverWindow(forced);
           r.paceLockedUntil = time + PACE_MIN_RECOVER_HOLD_SEC;
         }
-      } else {
+      } else if (!traitForcedSwitch) {
         const timedOut = time >= r.paceModeUntil;
         const recoveredEnough = r.stamina >= highStaminaGate;
         const wantRunSwitch = (recoveredEnough && time >= r.paceModeUntil - 0.28) || timedOut || desperateChase;
@@ -495,10 +527,11 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       }
 
       if (r.trait.id === "steady") {
-        speedMul *= 1.01;
+        speedMul *= 1.048;
         varMul *= 0.84;
-        drainMul *= 0.92;
-        spendDrive *= 0.86;
+        drainMul *= 0.88;
+        fatigueIgnore += 0.035;
+        spendDrive *= 0.82;
       }
       if (r.trait.id === "mid_spender") {
         if (progress < 0.32) {
@@ -526,10 +559,10 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
           spendDrive *= isFrontPack ? 0.88 : 0.94;
           if (phaseKey === "opening") speedMul *= 0.99;
         } else {
-          speedMul *= 1.38;
-          flat += 1.08;
-          drainMul *= 1.2;
-          spendDrive *= 1.33;
+          speedMul *= 1.32;
+          flat += 0.92;
+          drainMul *= 1.18;
+          spendDrive *= 1.24;
         }
       }
       if (r.trait.id === "front_runner") {
@@ -543,7 +576,8 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
             flat += 0.3;
           }
         } else if (progress > 0.7) {
-          speedMul *= 0.95;
+          speedMul *= 1.0;
+          flat += rank <= 2 ? 0.28 : 0;
         }
         speedMul *= FRONT_RUNNER_SCALE;
       }
@@ -567,17 +601,19 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       }
       if (r.trait.id === "sprinter") {
         if (phaseKey === "final" || phaseKey === "climax") {
-          speedMul *= 1.2;
-          flat += 0.75;
-          drainMul *= 1.35;
-          spendDrive *= 1.38;
+          speedMul *= 1.32;
+          flat += 1.35;
+          drainMul *= 1.42;
+          fatigueIgnore += 0.08;
+          spendDrive *= 1.42;
         } else {
-          speedMul *= 0.955;
+          speedMul *= 0.985;
         }
       }
       if (r.trait.id === "risk_taker") {
-        speedMul *= lerp(0.94, 1.28, rng());
-        varMul *= 1.24;
+        speedMul *= lerp(0.94, 1.24, rng());
+        flat += rng() < 0.28 ? 0.45 : 0;
+        varMul *= 1.22;
         spendDrive *= 1.18;
       }
       if (r.trait.id === "tactician") {
@@ -588,27 +624,40 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       }
       if (r.trait.id === "last_fight") {
         const isLast = rank === fieldSize;
-        const isBottom = rank >= Math.max(2, fieldSize - 1);
-        const isFrontPack = rank <= Math.max(1, Math.floor(fieldSize * 0.4));
+        const isBottom =
+          phaseKey === "final" || phaseKey === "climax"
+            ? rank >= Math.max(2, Math.ceil(fieldSize * 0.45))
+            : rank >= Math.max(2, fieldSize - 2);
+        const isFrontPack = rank <= Math.max(1, Math.floor(fieldSize * 0.3));
         if (isLast) {
-          speedMul *= 1.24;
-          flat += 0.88;
-          drainMul *= 1.3;
-          spendDrive *= 1.48;
-          regen += 0.0006;
+          speedMul *= 1.48;
+          flat += 1.25;
+          drainMul *= 1.22;
+          fatigueIgnore += 0.08;
+          spendDrive *= 1.36;
+          regen += 0.0014;
         } else if (isBottom) {
-          speedMul *= 1.12;
-          flat += 0.42;
-          drainMul *= 1.18;
-          spendDrive *= 1.24;
+          speedMul *= phaseKey === "final" || phaseKey === "climax" ? 1.42 : 1.32;
+          flat += phaseKey === "final" || phaseKey === "climax" ? 1.05 : 0.72;
+          drainMul *= 1.12;
+          fatigueIgnore += 0.04;
+          spendDrive *= 1.16;
         } else if (isFrontPack) {
-          speedMul *= 0.9;
-          drainMul *= 0.9;
-          spendDrive *= 0.86;
+          speedMul *= 1.0;
+          drainMul *= 0.88;
+          spendDrive *= 0.84;
         } else {
-          speedMul *= 0.97;
+          speedMul *= 1.1;
         }
       }
+
+      speedMul *= traitIntent.speedMul;
+      flat += traitIntent.flatSpeed;
+      drainMul *= traitIntent.drainMul;
+      regen += traitIntent.regenAdd;
+      varMul *= traitIntent.varianceMul;
+      fatigueIgnore += traitIntent.fatigueIgnore;
+      spendDrive *= traitIntent.spendDriveMul;
 
       // Optional external tuning hook used by auto-balance tooling.
       const tune = r.trait.tuning;
@@ -644,7 +693,7 @@ function simulateRace(trackMeters, runnerCount, rng, traits = TRAITS) {
       if (r.stamina < 0.2) fatigueMul = lerp(0.74, 1, clamp(r.stamina / 0.2, 0, 1));
       fatigueMul = lerp(fatigueMul, 1, clamp(fatigueIgnore, 0, 0.95));
 
-      const speed = Math.max(2.4, (r.trait.baseSpeed + variation + flat) * speedMul * fatigueMul);
+      const speed = Math.max(2.4, (r.baseSpeed + variation + flat) * speedMul * fatigueMul);
       const drain = r.trait.staminaDrainBase * drainMul * spendDrive;
       r.stamina = clamp(r.stamina + (regen - drain) * DT, 0.02, 1);
 

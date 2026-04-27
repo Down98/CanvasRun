@@ -68,7 +68,35 @@ body {
 
 .buttons {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.controls .skill-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #bdd4ec;
+  border-radius: 10px;
+  background: #f8fcff;
+  color: #29445f;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+}
+
+.controls .skill-toggle input {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  accent-color: #2f7ee8;
+  cursor: pointer;
 }
 
 button {

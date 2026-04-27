@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+import { getTraitRaceIntent, pickTraitSkillLoadout, pickTraitUltimate } from "./game/traitBehavior";
 
 const MIN_TRACK = 1;
 const MAX_TRACK = 10000;
@@ -907,44 +908,13 @@ function rollPaceDuration(minSec, maxSec, bias = 0.5) {
 }
 
 function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
-  const totalSkillNeed = names.length * 4;
-  const globalSkillDeck = totalSkillNeed <= pool.length ? pickUnique(pool, pool.length) : null;
-
-  const drawLoadout = () => {
-    if (!globalSkillDeck) return limitRecoverSkills(pickUnique(pool, 4), pool, 1);
-
-    const chosen = [];
-    const hold = [];
-    let recoverCount = 0;
-
-    while (globalSkillDeck.length && chosen.length < 4) {
-      const skill = globalSkillDeck.shift();
-      if (!skill) continue;
-      if (skill.kind === "recover" && recoverCount >= 1) {
-        hold.push(skill);
-        continue;
-      }
-      chosen.push(skill);
-      if (skill.kind === "recover") recoverCount += 1;
-    }
-
-    if (hold.length) globalSkillDeck.push(...hold);
-    if (chosen.length < 4) {
-      const refill = pickUnique(pool, pool.length)
-        .filter((s) => !chosen.some((c) => c.id === s.id))
-        .slice(0, 4 - chosen.length);
-      return limitRecoverSkills([...chosen, ...refill], pool, 1).slice(0, 4);
-    }
-    return limitRecoverSkills(chosen, pool, 1).slice(0, 4);
-  };
-
   return names.map((name, i) => {
-    const loadout = drawLoadout();
     const trait = RUNNER_TRAITS[Math.floor(Math.random() * RUNNER_TRAITS.length)];
+    const loadout = limitRecoverSkills(pickTraitSkillLoadout(pool, trait.id, 4), pool, 1);
     const paceProfile = createPaceProfile(trait.id);
     const staminaPlan = createStaminaPlan(trait.id);
     const initialRunSec = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62);
-    const ultimate = { ...ultimatePool[Math.floor(Math.random() * ultimatePool.length)] };
+    const ultimate = pickTraitUltimate(ultimatePool, trait.id);
     return {
       id: `${name}-${i}-${Date.now()}`,
       name,
@@ -968,6 +938,9 @@ function createRunners(names, pool, ultimatePool = ULTIMATE_POOL) {
       paceModeUntil: initialRunSec,
       paceLockedUntil: 0,
       paceCycle: 0,
+      traitIntentAction: "hold",
+      traitIntentLabel: "페이스 유지",
+      traitIntentSkillChanceMul: 1,
       ultimate,
       ultimateUsed: false,
       ultimateActiveUntil: 0,
@@ -1048,6 +1021,9 @@ function prepareRunnersForRace(baseRunners) {
       paceModeUntil: rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.62),
       paceLockedUntil: 0,
       paceCycle: 0,
+      traitIntentAction: "hold",
+      traitIntentLabel: "페이스 유지",
+      traitIntentSkillChanceMul: 1,
       ultimate: { ...(r.ultimate ?? ULTIMATE_POOL[0]) },
       ultimateUsed: false,
       ultimateActiveUntil: 0,
@@ -1201,6 +1177,7 @@ function buildCards(race) {
         color: r.color,
         traitLabel: r.traitLabel,
         traitColor: r.traitColor,
+        traitIntentLabel: r.traitIntentLabel ?? "페이스 유지",
         distance: r.distance,
         speed: r.speed,
         stamina: r.stamina,
@@ -1238,6 +1215,7 @@ export default function App() {
   const [deployedRunners, setDeployedRunners] = useState([]);
   const [showResultModal, setShowResultModal] = useState(false);
   const [volumePreset, setVolumePreset] = useState(3);
+  const [skillsEnabled, setSkillsEnabled] = useState(true);
   const [hud, setHud] = useState({
     leaderName: "-",
     surgeName: "-",
@@ -1300,6 +1278,7 @@ export default function App() {
     cameraEventFocusId: "",
     cameraEventUntil: 0,
     cameraEventKind: "",
+    skillsEnabled: true,
     runners: [],
     particles: [],
     prevRanks: new Map(),
@@ -1529,6 +1508,7 @@ export default function App() {
     if (runner.traitId === "risk_taker") traitSkillChanceMul = 1.12;
     if (runner.traitId === "endurance") traitSkillChanceMul = 0.68;
     if (runner.traitId === "steady") traitSkillChanceMul = 0.96;
+    traitSkillChanceMul *= runner.traitIntentSkillChanceMul ?? 1;
     const fieldSize = Math.max(2, race.runners.length);
     let rankSkillChanceMul = 1;
     let rankSkillChanceAdd = 0;
@@ -2155,9 +2135,9 @@ export default function App() {
         r.traitId === "tactician" ? 0.76 : r.traitId === "steady" ? 1.08 : r.traitId === "endurance" ? 1.12 : 1;
       if (race.elapsed >= r.nextSkillCheckAt) {
         r.nextSkillCheckAt += skillCheckInterval;
-        trySkill(race, r, c);
+        if (race.skillsEnabled) trySkill(race, r, c);
       }
-      tryUltimate(race, r, c, ts, fieldSize);
+      if (race.skillsEnabled) tryUltimate(race, r, c, ts, fieldSize);
       if (race.elapsed >= r.nextComebackCheckAt) {
         r.nextComebackCheckAt += 1;
         tryComebackBoost(race, r, c);
@@ -2319,22 +2299,52 @@ export default function App() {
       let preserveStrength = clamp(staminaGap / 0.28, 0, 1);
       let surplusStrength = clamp(-staminaGap / 0.32, 0, 1);
       const finalRushT = clamp((c.progress - 0.9) / 0.1, 0, 1);
+      const traitIntent = getTraitRaceIntent({
+        traitId: r.traitId,
+        progress: c.progress,
+        rank: c.rank,
+        fieldSize,
+        gapLeader: c.gapLeader,
+        gapAhead: c.gapAhead,
+        gapBehind: c.gapBehind,
+        stamina: r.stamina,
+        phaseKey: race.phaseKey
+      });
+      r.traitIntentAction = traitIntent.action;
+      r.traitIntentLabel = traitIntent.label;
+      r.traitIntentSkillChanceMul = traitIntent.skillChanceMul;
 
       const rollRunWindow = () => {
         let d = rollPaceDuration(paceProfile.runMinSec, paceProfile.runMaxSec, 0.56);
         if (c.progress < 0.24) d *= paceProfile.earlyRunBias;
         if (c.progress > 0.72) d *= paceProfile.lateRunBias;
         if (desperateChase) d *= 1.22;
+        d *= traitIntent.runWindowMul;
         return clamp(d, 0.8, 8.2);
       };
       const rollRecoverWindow = (forceRecover = false) => {
         let d = rollPaceDuration(paceProfile.recoverMinSec, paceProfile.recoverMaxSec, forceRecover ? 0.72 : 0.48);
         if (c.progress > 0.78) d *= 0.88;
         if (desperateChase) d *= 0.7;
+        d *= traitIntent.recoverWindowMul;
         return clamp(d, 0.45, 5.3);
       };
 
-      if (r.paceMode === "run") {
+      let traitForcedSwitch = false;
+      if (traitIntent.forceRun && r.paceMode !== "run" && canSwitchPaceMode && r.stamina > 0.06) {
+        r.paceMode = "run";
+        r.paceModeUntil = race.elapsed + rollRunWindow();
+        r.paceLockedUntil = race.elapsed + PACE_MIN_RUN_HOLD_SEC;
+        traitForcedSwitch = true;
+      } else if (traitIntent.forceRecover && r.paceMode !== "recover" && canSwitchPaceMode && r.stamina < 0.86 && finalRushT <= 0) {
+        r.paceMode = "recover";
+        r.paceModeUntil = race.elapsed + rollRecoverWindow(true);
+        r.paceLockedUntil = race.elapsed + PACE_MIN_RECOVER_HOLD_SEC;
+        r.paceCycle = (r.paceCycle ?? 0) + 1;
+        traitForcedSwitch = true;
+      }
+
+      if (!traitForcedSwitch && r.paceMode === "run") {
         const timedOut = race.elapsed >= r.paceModeUntil;
         const forced = r.stamina <= lowStaminaGate;
         if ((forced || timedOut) && canSwitchPaceMode) {
@@ -2343,7 +2353,7 @@ export default function App() {
           r.paceLockedUntil = race.elapsed + PACE_MIN_RECOVER_HOLD_SEC;
           r.paceCycle = (r.paceCycle ?? 0) + 1;
         }
-      } else {
+      } else if (!traitForcedSwitch) {
         const timedOut = race.elapsed >= r.paceModeUntil;
         const recoveredEnough = r.stamina >= highStaminaGate;
         const wantRunSwitch = (recoveredEnough && race.elapsed >= r.paceModeUntil - 0.28) || timedOut || desperateChase;
@@ -2405,10 +2415,11 @@ export default function App() {
       }
 
       if (r.traitId === "steady") {
-        speedMul *= 1.0293;
+        speedMul *= 1.048;
         varMul *= 0.84;
-        drainMul *= 0.92;
-        spendDrive *= 0.86;
+        drainMul *= 0.88;
+        fatigueIgnore += 0.035;
+        spendDrive *= 0.82;
       }
       if (r.traitId === "mid_spender") {
         if (c.progress < 0.32) {
@@ -2436,10 +2447,10 @@ export default function App() {
           spendDrive *= isFrontPack ? 0.68 : 0.78;
           if (race.phaseKey === "opening") speedMul *= 0.9141;
         } else {
-          speedMul *= 1.232;
-          flat += 0.52;
-          drainMul *= 1.28;
-          spendDrive *= 1.3;
+          speedMul *= 1.205;
+          flat += 0.5;
+          drainMul *= 1.24;
+          spendDrive *= 1.22;
         }
       }
       if (r.traitId === "front_runner") {
@@ -2456,7 +2467,8 @@ export default function App() {
             flat += 0.42;
           }
         } else if (c.progress > 0.7) {
-          speedMul *= 0.9004;
+          speedMul *= 0.97;
+          flat += c.rank <= 2 ? 0.28 : 0;
         }
         // If lead is secured, front runners stabilize pace to avoid burning out too early.
         if (c.rank === 1 && c.progress >= 0.18 && c.progress < 0.62) {
@@ -2493,18 +2505,20 @@ export default function App() {
       }
       if (r.traitId === "sprinter") {
         if (race.phaseKey === "final" || race.phaseKey === "climax") {
-          speedMul *= 1.2083;
-          flat += 0.75;
-          drainMul *= 1.35;
-          spendDrive *= 1.38;
+          speedMul *= 1.32;
+          flat += 1.35;
+          drainMul *= 1.42;
+          fatigueIgnore += 0.08;
+          spendDrive *= 1.42;
         } else {
-          speedMul *= 0.9616;
+          speedMul *= 0.985;
         }
       }
       if (r.traitId === "risk_taker") {
-        speedMul *= lerp(0.863, 1.1699, Math.random());
-        varMul *= 1.18;
-        spendDrive *= 1.28;
+        speedMul *= lerp(0.94, 1.24, Math.random());
+        flat += Math.random() < 0.28 ? 0.45 : 0;
+        varMul *= 1.22;
+        spendDrive *= 1.18;
       }
       if (r.traitId === "tactician") {
         speedMul *= 0.9845;
@@ -2514,27 +2528,40 @@ export default function App() {
       }
       if (r.traitId === "last_fight") {
         const isLast = c.rank === fieldSize;
-        const isBottom = c.rank >= Math.max(2, fieldSize - 1);
-        const isFrontPack = c.rank <= Math.max(1, Math.floor(fieldSize * 0.4));
+        const isBottom =
+          race.phaseKey === "final" || race.phaseKey === "climax"
+            ? c.rank >= Math.max(2, Math.ceil(fieldSize * 0.45))
+            : c.rank >= Math.max(2, fieldSize - 2);
+        const isFrontPack = c.rank <= Math.max(1, Math.floor(fieldSize * 0.3));
         if (isLast) {
-          speedMul *= 1.364;
-          flat += 0.88;
-          drainMul *= 1.3;
-          spendDrive *= 1.48;
-          regen += 0.0006;
+          speedMul *= 1.48;
+          flat += 1.25;
+          drainMul *= 1.22;
+          fatigueIgnore += 0.08;
+          spendDrive *= 1.36;
+          regen += 0.0014;
         } else if (isBottom) {
-          speedMul *= 1.232;
-          flat += 0.42;
-          drainMul *= 1.18;
-          spendDrive *= 1.24;
+          speedMul *= race.phaseKey === "final" || race.phaseKey === "climax" ? 1.42 : 1.32;
+          flat += race.phaseKey === "final" || race.phaseKey === "climax" ? 1.05 : 0.72;
+          drainMul *= 1.12;
+          fatigueIgnore += 0.04;
+          spendDrive *= 1.16;
         } else if (isFrontPack) {
-          speedMul *= 0.99;
-          drainMul *= 0.9;
-          spendDrive *= 0.86;
+          speedMul *= 1.0;
+          drainMul *= 0.88;
+          spendDrive *= 0.84;
         } else {
-          speedMul *= 1.067;
+          speedMul *= 1.1;
         }
       }
+
+      speedMul *= traitIntent.speedMul;
+      flat += traitIntent.flatSpeed;
+      drainMul *= traitIntent.drainMul;
+      regen += traitIntent.regenAdd;
+      varMul *= traitIntent.varianceMul;
+      fatigueIgnore += traitIntent.fatigueIgnore;
+      spendDrive *= traitIntent.spendDriveMul;
 
       if (finalRushT > 0) {
         // Convert remaining stamina into final acceleration instead of preserving it.
@@ -3438,6 +3465,7 @@ export default function App() {
       cameraEventFocusId: "",
       cameraEventUntil: 0,
       cameraEventKind: "",
+      skillsEnabled,
       runners,
       particles: [],
       prevRanks: new Map(runners.map((r, i) => [r.id, i + 1])),
@@ -3449,7 +3477,7 @@ export default function App() {
     setFinalResults([]);
     setShowResultModal(false);
     setRaceLogs([]);
-    appendRaceLog(`레이스 시작: ${runners.length}명 / ${setup.track}m`, "#22c55e");
+    appendRaceLog(`레이스 시작: ${runners.length}명 / ${setup.track}m / 스킬 ${skillsEnabled ? "사용" : "미사용"}`, "#22c55e");
     setIsRunning(true);
     startBgm();
     setViewMode("race");
@@ -3526,6 +3554,10 @@ export default function App() {
                 <button onClick={startRace} className="ghost" disabled={!deployedRunners.length}>
                   레이스 시작
                 </button>
+                <label className="skill-toggle">
+                  <input type="checkbox" checked={skillsEnabled} onChange={(e) => setSkillsEnabled(e.target.checked)} />
+                  스킬 사용
+                </label>
               </div>
             </div>
             <p className="meta">스킬 풀: {skillPool.length}종 / 타입: {TOTAL_SKILL_TYPE_COUNT}종 / 궁극기: {ULTIMATE_POOL.length}종</p>
@@ -3694,6 +3726,7 @@ export default function App() {
                         <p className="meta-tight">
                           성향: <span style={{ color: c.traitColor }}>{c.traitLabel}</span>
                         </p>
+                        <p className="meta-tight">작전: {c.traitIntentLabel}</p>
                         <p className="meta-tight">
                           궁극기: <span style={{ color: c.ultimateColor }}>{c.ultimateName}</span> ({c.ultimateState})
                         </p>
